@@ -39,6 +39,27 @@ local colorPalette = {
     Rosewater = Color3.fromRGB(245, 224, 220),
 }
 
+--// This holds all the GUI elements for both plugin & gui!
+guiModule.guiElements = {
+    -- This holds the plugin elements
+	Plugin = {
+        ["Toolbar"] = nil,
+        ["ToggleButton"] = nil
+    },
+    -- Holds the actual palette elements
+    Gui = {
+        -- Plugin, Input are frames & CommandsScrolling are ScrollingFrame
+        ["Palette"] = nil,
+        ["Input"] = nil,
+        ["CommandsScrolling"] = nil,
+
+        -- Holds all commands in the gui
+        Commands = {
+
+        }
+    }
+}
+
 --[[
 GUI Creation related stuff
 ]]
@@ -92,6 +113,9 @@ function createPalette(parent : Instance)
         Thickness = 1
     })
 
+    --// Register palette in table
+    guiModule.guiElements.Gui.Palette = palette
+
     return palette
 end
 
@@ -135,6 +159,9 @@ function createInputArea(parent : Instance)
         ClearTextOnFocus = false,
     })
 
+    -- Register the input frame in the table
+    guiModule.guiElements.Gui.Input = input
+
     return input
 end
 
@@ -177,6 +204,9 @@ function createCommandsScrollingFrame(parent : Instance)
         Name = "UIListLayout",
         Parent = scrollingFrame
     })
+
+    -- Register our scrollingFrame in the table.
+    guiModule.guiElements.Gui.CommandsScrolling = scrollingFrame
 
     return scrollingFrame
 end
@@ -226,7 +256,39 @@ function createCommandPreview(parent : Instance, title : string, callback : () -
         TextXAlignment = Enum.TextXAlignment.Left
     })
 
+    -- Setup the callback
+
+    Command.Activated:Connect(callback)
+
+    -- Register our new command ui in the table
+    table.insert(
+        guiModule.guiElements.Gui.Commands,
+        {
+            title = title,
+            commandFrame = Command
+        }
+    )
+
     return Command
+end
+
+--// Remove all commands added
+function removeAllCommands()
+
+    -- Reset commands table
+    guiModule.guiElements.Gui.Commands = {}
+
+    -- Does the commands UI exist?
+    if not guiModule.guiElements.Gui.CommandsScrolling then return end
+
+    -- Destroy all commands in the UI
+    for _, command in guiModule.guiElements.Gui.CommandsScrolling:GetChildren() do
+        -- Is it a button?
+        if not command:IsA("TextButton") then continue end
+
+        -- Bye bye button!
+        command:Destroy()
+    end
 end
 
 --// Open the palette gui!
@@ -235,19 +297,22 @@ function guiModule:openPalette(parent : Instance)
         Parent = game.StarterGui
     })
 
+    -- Create the palette & its gui!
     local palette = createPalette(screenGui)
     createInputArea(palette)
     createSpacer(palette)
-
-    local frame = createCommandsScrollingFrame(palette)
-    createCommandPreview(frame, "Preferences: Color Theme", function()  
-        print("Hello")
-    end, true)
+    createCommandsScrollingFrame(palette)
 end
 
 --// Close the palette gui
 function guiModule:closePalette(parent : Instance)
     
 end
+
+--// Register create command function
+guiModule.createCommandPreview = createCommandPreview
+
+--// Reset all commands in module
+guiModule.removeAllCommands = removeAllCommands
 
 return guiModule

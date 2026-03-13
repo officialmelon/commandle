@@ -7,3 +7,5 @@ e.g. --// This is a function!
 
 Document inner workings of a function using normal comments
 e.g. -- This prints hello world!
+
+We use camelCase!

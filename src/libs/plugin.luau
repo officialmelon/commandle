@@ -1,5 +1,9 @@
 local PluginModule = {}
 
+--// require our input module
+local inputModule = require(script.Parent.input)
+local commandsModule = require(script.Parent.commands)
+
 --[[
 These are some utility functions used for easier code!
 ]]
@@ -20,7 +24,12 @@ Handles the plugin creation & start.
 
 --// This starts the plugin itself, registers functions etc
 function PluginModule:startPlugin()
-    
+
+	-- Start the input module
+    inputModule:startModule()
+
+    -- Insert all commands from module
+    commandsModule:setupCommands()
 end
 
 --// Creates the plugin in the toolbar, and runs startPlugin
@@ -31,6 +40,7 @@ function PluginModule:createPlugin(plugin : Plugin)
 
     -- Start the plugin
     PluginModule:startPlugin()
+	
 end
 
 return PluginModule
