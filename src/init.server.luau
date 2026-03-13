@@ -13,4 +13,4 @@ local guiModule = require(LibsFolder.gui)
 --// Create the plugin & Start our input module
 pluginModule:createPlugin(plugin)
 inputModule:startModule()
-guiModule:openPallete()
+guiModule:openPalette()

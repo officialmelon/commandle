@@ -27,7 +27,7 @@ end
 function PluginModule:createPlugin(plugin : Plugin)
     -- Lets create the stuff!
 	local Toolbar = createToolbar(plugin, "Commandle")
-	local ToggleButton = createButton(Toolbar, "Commandle Toggle", "Disable/Enable commandle pallete", "")
+	local ToggleButton = createButton(Toolbar, "Commandle Toggle", "Disable/Enable commandle palette", "")
 
     -- Start the plugin
     PluginModule:startPlugin()

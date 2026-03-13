@@ -1,7 +1,7 @@
 local guiModule = {}
 
---// The color pallete we use! (Catppuccin Mocha)
-local colorPallete = {
+--// The color palette we use! (Catppuccin Mocha)
+local colorPalette = {
     -- Bases
     Crust    = Color3.fromRGB(17, 17, 27),
     Mantle   = Color3.fromRGB(24, 24, 37),
@@ -57,14 +57,14 @@ function createInstance(className: string, propertyTable: {[string]: any})
     return createdInstance
 end
 
---// Create the pallete
-function createPallete(parent : Instance)
-    -- Create the pallete frame
-    local pallete = createInstance("Frame", {
-        Name = "Pallete",
+--// Create the palette
+function createPalette(parent : Instance)
+    -- Create the palette frame
+    local palette = createInstance("Frame", {
+        Name = "Palette",
         Parent = parent,
 
-        BackgroundColor3 = colorPallete.Surface0,
+        BackgroundColor3 = colorPalette.Surface0,
 
         Size = UDim2.new(0, 660, 0, 490),
         AnchorPoint = Vector2.new(0.5, 0),
@@ -74,7 +74,7 @@ function createPallete(parent : Instance)
     -- Create the UICorner
     createInstance("UICorner", {
         Name = "UICorner",
-        Parent = pallete,
+        Parent = palette,
 
         CornerRadius = UDim.new(0, 6),
     })
@@ -82,17 +82,17 @@ function createPallete(parent : Instance)
     -- Create the UIStroke
     createInstance("UIStroke", {
         Name = "UIStroke",
-        Parent = pallete,
+        Parent = palette,
 
         ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual,
         BorderStrokePosition = Enum.BorderStrokePosition.Outer,
         LineJoinMode = Enum.LineJoinMode.Round,
 
-        Color = colorPallete.Surface2,
+        Color = colorPalette.Surface2,
         Thickness = 1
     })
 
-    return pallete
+    return palette
 end
 
 --// Create the Input area
@@ -102,7 +102,7 @@ function createInputArea(parent : Instance)
         Name = "Input",
         Parent = parent,
 
-        BackgroundColor3 = colorPallete.Surface0,
+        BackgroundColor3 = colorPalette.Surface0,
         Position = UDim2.new(0,0,0,0),
         Size = UDim2.new(1, 0, 0, 38)
     })
@@ -128,8 +128,8 @@ function createInputArea(parent : Instance)
         TextSize = 15,
         PlaceholderText = "Search...",
         Text = "",
-        PlaceholderColor3 = colorPallete.Subtext0,
-        TextColor3 = colorPallete.Subtext0,
+        PlaceholderColor3 = colorPalette.Subtext0,
+        TextColor3 = colorPalette.Subtext0,
         TextXAlignment = Enum.TextXAlignment.Left,
 
         ClearTextOnFocus = false,
@@ -149,7 +149,7 @@ function createSpacer(parent : Instance)
         Position = UDim2.new(0,0,0,38),
         Size = UDim2.new(1,0,0,1),
 
-        BackgroundColor3 = colorPallete.Surface2
+        BackgroundColor3 = colorPalette.Surface2
     })
 end
 
@@ -165,7 +165,7 @@ function createCommandsScrollingFrame(parent : Instance)
         Size = UDim2.new(1,0,1,-39),
 
         ScrollBarThickness = 4,
-        ScrollBarImageColor3 = colorPallete.Overlay0,
+        ScrollBarImageColor3 = colorPalette.Overlay0,
         CanvasSize = UDim2.new(0,0,0,0),
         AutomaticCanvasSize = Enum.AutomaticSize.Y,
         ScrollingDirection = Enum.ScrollingDirection.Y,
@@ -189,7 +189,7 @@ function createCommandPreview(parent : Instance, title : string, callback : () -
         Parent = parent,
 
         Text = "",
-        BackgroundColor3 =  isSelected and colorPallete.Surface1 or colorPallete.Surface0,
+        BackgroundColor3 =  isSelected and colorPalette.Surface1 or colorPalette.Surface0,
         Size = UDim2.new(1,0,0,26),
         BorderSizePixel = 0
     })
@@ -199,7 +199,7 @@ function createCommandPreview(parent : Instance, title : string, callback : () -
         Name = "Selected",
         Parent = Command,
 
-        BackgroundColor3 = colorPallete.Blue,
+        BackgroundColor3 = colorPalette.Blue,
 
         Position = UDim2.new(0,0,0,0),
         Size = UDim2.new(0,2,1,0),
@@ -220,7 +220,7 @@ function createCommandPreview(parent : Instance, title : string, callback : () -
 
         FontFace = Font.fromEnum(Enum.Font.Code),
         TextSize = 13,
-        TextColor3 = colorPallete.Text,
+        TextColor3 = colorPalette.Text,
         Text = title,
 
         TextXAlignment = Enum.TextXAlignment.Left
@@ -229,25 +229,24 @@ function createCommandPreview(parent : Instance, title : string, callback : () -
     return Command
 end
 
---// Open the pallete gui!
-function guiModule:openPallete()
+--// Open the palette gui!
+function guiModule:openPalette(parent : Instance)
     local screenGui = createInstance("ScreenGui", {
         Parent = game.StarterGui
     })
-    local pallete = createPallete(screenGui)
-    createInputArea(pallete)
-    createSpacer(pallete)
-    local frame = createCommandsScrollingFrame(pallete)
+
+    local palette = createPalette(screenGui)
+    createInputArea(palette)
+    createSpacer(palette)
+
+    local frame = createCommandsScrollingFrame(palette)
     createCommandPreview(frame, "Preferences: Color Theme", function()  
         print("Hello")
     end, true)
-    createCommandPreview(frame, "Preferences: Icon Theme", function()  
-        print("Hello")
-    end, false)
 end
 
---// Close the pallete gui
-function guiModule:closePallete()
+--// Close the palette gui
+function guiModule:closePalette(parent : Instance)
     
 end
 
