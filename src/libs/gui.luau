@@ -1,0 +1,254 @@
+local guiModule = {}
+
+--// The color pallete we use! (Catppuccin Mocha)
+local colorPallete = {
+    -- Bases
+    Crust    = Color3.fromRGB(17, 17, 27),
+    Mantle   = Color3.fromRGB(24, 24, 37),
+    Base     = Color3.fromRGB(30, 30, 46),
+
+    -- Surfaces
+    Surface0 = Color3.fromRGB(49, 50, 68),
+    Surface1 = Color3.fromRGB(69, 71, 90),
+    Surface2 = Color3.fromRGB(88, 91, 112),
+
+    -- Overlays
+    Overlay0 = Color3.fromRGB(108, 112, 134),
+    Overlay1 = Color3.fromRGB(127, 132, 156),
+    Overlay2 = Color3.fromRGB(147, 153, 178),
+
+    -- Text
+    Subtext0 = Color3.fromRGB(166, 173, 200),
+    Subtext1 = Color3.fromRGB(186, 194, 222),
+    Text     = Color3.fromRGB(205, 214, 244),
+
+    -- Accent colors
+    Lavender  = Color3.fromRGB(180, 190, 254),
+    Blue      = Color3.fromRGB(137, 180, 250),
+    Sapphire  = Color3.fromRGB(116, 199, 236),
+    Sky       = Color3.fromRGB(137, 220, 235),
+    Teal      = Color3.fromRGB(148, 226, 213),
+    Green     = Color3.fromRGB(166, 227, 161),
+    Yellow    = Color3.fromRGB(249, 226, 175),
+    Peach     = Color3.fromRGB(250, 179, 135),
+    Maroon    = Color3.fromRGB(235, 160, 172),
+    Red       = Color3.fromRGB(243, 139, 168),
+    Mauve     = Color3.fromRGB(203, 166, 247),
+    Pink      = Color3.fromRGB(245, 194, 231),
+    Flamingo  = Color3.fromRGB(242, 205, 205),
+    Rosewater = Color3.fromRGB(245, 224, 220),
+}
+
+--[[
+GUI Creation related stuff
+]]
+
+--// create instance based on className and propertyTable
+function createInstance(className: string, propertyTable: {[string]: any})
+    local createdInstance = Instance.new(className)
+    
+    for property, value in propertyTable do
+        if property ~= "Parent" then
+            createdInstance[property] = value
+        end
+    end
+    
+    createdInstance.Parent = propertyTable.Parent
+    return createdInstance
+end
+
+--// Create the pallete
+function createPallete(parent : Instance)
+    -- Create the pallete frame
+    local pallete = createInstance("Frame", {
+        Name = "Pallete",
+        Parent = parent,
+
+        BackgroundColor3 = colorPallete.Surface0,
+
+        Size = UDim2.new(0, 660, 0, 490),
+        AnchorPoint = Vector2.new(0.5, 0),
+        Position = UDim2.new(0.5, 0, 0, 40)
+    })
+
+    -- Create the UICorner
+    createInstance("UICorner", {
+        Name = "UICorner",
+        Parent = pallete,
+
+        CornerRadius = UDim.new(0, 6),
+    })
+
+    -- Create the UIStroke
+    createInstance("UIStroke", {
+        Name = "UIStroke",
+        Parent = pallete,
+
+        ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual,
+        BorderStrokePosition = Enum.BorderStrokePosition.Outer,
+        LineJoinMode = Enum.LineJoinMode.Round,
+
+        Color = colorPallete.Surface2,
+        Thickness = 1
+    })
+
+    return pallete
+end
+
+--// Create the Input area
+function createInputArea(parent : Instance)
+    -- Create the Input area frame
+    local input = createInstance("Frame", {
+        Name = "Input",
+        Parent = parent,
+
+        BackgroundColor3 = colorPallete.Surface0,
+        Position = UDim2.new(0,0,0,0),
+        Size = UDim2.new(1, 0, 0, 38)
+    })
+
+    -- Create the UICorner
+    createInstance("UICorner", {
+        Name = "UICorner",
+        Parent = input,
+
+        CornerRadius = UDim.new(0, 6)
+    })
+
+    -- Create the search box input
+    local inputArea = createInstance("TextBox", {
+        Parent = input,
+        BackgroundTransparency = 1,
+
+        Position = UDim2.new(0, 10, 0, 0),
+        Size = UDim2.new(0.942, 16,1, 0),
+
+        ZIndex = 4,
+        FontFace = Font.fromEnum(Enum.Font.Code),
+        TextSize = 15,
+        PlaceholderText = "Search...",
+        Text = "",
+        PlaceholderColor3 = colorPallete.Subtext0,
+        TextColor3 = colorPallete.Subtext0,
+        TextXAlignment = Enum.TextXAlignment.Left,
+
+        ClearTextOnFocus = false,
+    })
+
+    return input
+end
+
+--// Creates the spacer between the Input & Commands.
+function createSpacer(parent : Instance)
+    -- Create the spacer frame
+    return createInstance("Frame", {
+        Name = "Spacer",
+        Parent = parent,
+
+        ZIndex = 3,
+        Position = UDim2.new(0,0,0,38),
+        Size = UDim2.new(1,0,0,1),
+
+        BackgroundColor3 = colorPallete.Surface2
+    })
+end
+
+--// Creates the scrolling frame that holds the commands
+function createCommandsScrollingFrame(parent : Instance)
+    -- Creates the scrolling frame
+    local scrollingFrame = createInstance("ScrollingFrame", {
+        Name = "Commands",
+        Parent = parent,
+
+        BackgroundTransparency = 1,
+        Position = UDim2.new(0,0,0,39),
+        Size = UDim2.new(1,0,1,-39),
+
+        ScrollBarThickness = 4,
+        ScrollBarImageColor3 = colorPallete.Overlay0,
+        CanvasSize = UDim2.new(0,0,0,0),
+        AutomaticCanvasSize = Enum.AutomaticSize.Y,
+        ScrollingDirection = Enum.ScrollingDirection.Y,
+
+        ZIndex = 3
+    })
+
+    createInstance("UIListLayout", {
+        Name = "UIListLayout",
+        Parent = scrollingFrame
+    })
+
+    return scrollingFrame
+end
+
+--// Create a command preview
+function createCommandPreview(parent : Instance, title : string, callback : () -> (), isSelected : boolean)
+    -- Create the command button
+    local Command = createInstance("TextButton", {
+        Name = "Command",
+        Parent = parent,
+
+        Text = "",
+        BackgroundColor3 =  isSelected and colorPallete.Surface1 or colorPallete.Surface0,
+        Size = UDim2.new(1,0,0,26),
+        BorderSizePixel = 0
+    })
+
+    -- Create the selected frame
+    createInstance("Frame", {
+        Name = "Selected",
+        Parent = Command,
+
+        BackgroundColor3 = colorPallete.Blue,
+
+        Position = UDim2.new(0,0,0,0),
+        Size = UDim2.new(0,2,1,0),
+        Visible = isSelected or false,
+        BorderSizePixel = 0
+    })
+
+    -- Create the title textlabel
+    createInstance("TextLabel", {
+        Name = "Title",
+        Parent = Command,
+
+        BackgroundTransparency = 1,
+        ZIndex = 5,
+
+        Position = UDim2.new(0,10,0,0),
+        Size = UDim2.new(0.485,-14,1,0),
+
+        FontFace = Font.fromEnum(Enum.Font.Code),
+        TextSize = 13,
+        TextColor3 = colorPallete.Text,
+        Text = title,
+
+        TextXAlignment = Enum.TextXAlignment.Left
+    })
+
+    return Command
+end
+
+--// Open the pallete gui!
+function guiModule:openPallete()
+    local screenGui = createInstance("ScreenGui", {
+        Parent = game.StarterGui
+    })
+    local pallete = createPallete(screenGui)
+    createInputArea(pallete)
+    createSpacer(pallete)
+    local frame = createCommandsScrollingFrame(pallete)
+    createCommandPreview(frame, "Preferences: Color Theme", function()  
+        print("Hello")
+    end, true)
+    createCommandPreview(frame, "Preferences: Icon Theme", function()  
+        print("Hello")
+    end, false)
+end
+
+--// Close the pallete gui
+function guiModule:closePallete()
+    
+end
+
+return guiModule
