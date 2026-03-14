@@ -89,7 +89,9 @@ function createPalette(parent : Instance)
 
         Size = UDim2.new(0, 660, 0, 490),
         AnchorPoint = Vector2.new(0.5, 0),
-        Position = UDim2.new(0.5, 0, 0, 40)
+        Position = UDim2.new(0.5, 0, 0, 40),
+
+        Active = true
     })
 
     -- Create the UICorner
@@ -128,7 +130,8 @@ function createInputArea(parent : Instance)
 
         BackgroundColor3 = colorPalette.Surface0,
         Position = UDim2.new(0,0,0,0),
-        Size = UDim2.new(1, 0, 0, 38)
+        Size = UDim2.new(1, 0, 0, 38),
+        Active = true
     })
 
     -- Create the UICorner
@@ -140,7 +143,7 @@ function createInputArea(parent : Instance)
     })
 
     -- Create the search box input
-    local inputArea = createInstance("TextBox", {
+    createInstance("TextBox", {
         Parent = input,
         BackgroundTransparency = 1,
 
@@ -291,10 +294,22 @@ function removeAllCommands()
     end
 end
 
+--// Return the GUI if its open!
+function getOpenGui()
+    return game:GetService("CoreGui"):FindFirstChild("cmdle")
+end
+
 --// Open the palette gui!
-function guiModule:openPalette(parent : Instance)
+function guiModule:openPalette()
+    if getOpenGui() then
+        guiModule:closePalette()
+    end
+
     local screenGui = createInstance("ScreenGui", {
-        Parent = game.StarterGui
+        Parent = game:GetService("CoreGui"),
+        Name = "cmdle",
+
+        DisplayOrder = 9999
     })
 
     -- Create the palette & its gui!
@@ -304,9 +319,15 @@ function guiModule:openPalette(parent : Instance)
     createCommandsScrollingFrame(palette)
 end
 
---// Close the palette gui
-function guiModule:closePalette(parent : Instance)
-    
+--// Close the palette gui (Destroy it)
+function guiModule:closePalette()
+    -- Grab the GUI
+    local openGui = getOpenGui()
+
+    -- Destroy
+    if openGui then
+        openGui:Destroy()
+    end
 end
 
 --// Register create command function
