@@ -570,6 +570,14 @@ function setupSearch()
 	inputBox:GetPropertyChangedSignal("Text"):Connect(function()
 		guiModule:rebuildUI()
 	end)
+
+	-- Capture focus
+	inputBox:CaptureFocus()
+
+	-- Small delay since CaptureFocus will capture our binds from input.luau
+	task.delay(0.01, function()
+		inputBox.Text = ""
+	end)
 end
 
 --// Add singular command
