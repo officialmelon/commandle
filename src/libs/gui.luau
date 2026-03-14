@@ -1,5 +1,7 @@
 local guiModule = {}
 
+local searchModule = require(script.Parent.search)
+
 --// The color palette we use! (Catppuccin Mocha)
 local colorPalette = {
     -- Bases
@@ -38,6 +40,9 @@ local colorPalette = {
     Flamingo  = Color3.fromRGB(242, 205, 205),
     Rosewater = Color3.fromRGB(245, 224, 220),
 }
+
+--// Holds all registered commands (source of truth for search)
+guiModule.registeredCommands = {}
 
 --// This holds all the GUI elements for both plugin & gui!
 guiModule.guiElements = {
@@ -261,6 +266,7 @@ function createCommandPreview(parent : Instance, title : string, callback : () -
 
     -- Setup the callback
 
+    print(callback)
     Command.Activated:Connect(callback)
 
     -- Register our new command ui in the table
@@ -299,6 +305,45 @@ function getOpenGui()
     return game:GetService("CoreGui"):FindFirstChild("cmdle")
 end
 
+--// Rebuilds the UI (refreshes commands)
+function guiModule:rebuildUI()
+    -- Get the textbox from gui.luau!
+    local textBox = guiModule.guiElements.Gui.Input and guiModule.guiElements.Gui.Input:FindFirstChild("TextBox")
+
+    -- Search against the master registry
+    local filtered
+    if textBox and textBox.Text ~= "" then
+        filtered = searchModule:search(textBox.Text, guiModule.registeredCommands)
+    else 
+        filtered = guiModule.registeredCommands
+    end
+
+    -- remove all existing commands
+    removeAllCommands()
+
+    -- add all commands back.
+    for _, cmd in filtered do
+        createCommandPreview(guiModule.guiElements.Gui.CommandsScrolling, cmd.title, cmd.callback, false)
+    end
+end
+
+--// Setup the search feature on the palette
+function setupSearch()
+    -- Input setup!
+    local inputBox : TextBox = guiModule.guiElements.Gui.Input:WaitForChild("TextBox")
+    inputBox:GetPropertyChangedSignal("Text"):Connect(function()
+        guiModule:rebuildUI()
+    end)
+end
+
+function guiModule:addCommand( title : string, callback : () -> ())
+    table.insert(guiModule.registeredCommands, {
+        title = title,
+        callback = callback
+    })
+    guiModule:rebuildUI()
+end
+
 --// Open the palette gui!
 function guiModule:openPalette()
     if getOpenGui() then
@@ -317,6 +362,9 @@ function guiModule:openPalette()
     createInputArea(palette)
     createSpacer(palette)
     createCommandsScrollingFrame(palette)
+
+    -- Finally setup the search
+    setupSearch()
 end
 
 --// Close the palette gui (Destroy it)

@@ -29,7 +29,7 @@ function PluginModule:startPlugin()
     inputModule:startModule()
 
     -- Insert all commands from module
-    commandsModule:setupCommands()
+    commandsModule:setupCommands()    
 end
 
 --// Creates the plugin in the toolbar, and runs startPlugin

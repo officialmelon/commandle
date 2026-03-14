@@ -9,27 +9,21 @@ local gui = require(script.Parent.gui)
 
 --// Insert a command into the gui
 function insertCommand(title, callback)
-    
-    guiModule.createCommandPreview(
-        guiModule.guiElements.Gui.CommandsScrolling, 
-        title, 
-        callback, 
-        false
-    )
-
+    guiModule:addCommand(title, callback)
 end
 
 --// Setup the commands for our palette
 function commands:setupCommands()
 
     -- Reset commands
-    guiModule.removeAllCommands()
+    guiModule.registeredCommands = {}
+    guiModule:rebuildUI()
 
     -- Create a Instance into Workspace
     insertCommand("Create Instance", function()  
 
         -- Remove all commands
-        guiModule.removeAllCommands()
+        guiModule.registeredCommands = {}
 
         -- Create all classes as buttons.
         for _, classInfo in reflectionService:GetClasses({
@@ -53,7 +47,7 @@ function commands:setupCommands()
             insertCommand(classInfo.Name, function()  
                 -- Attempt to create Instance
                 local newInstance
-                local err, out = pcall(function()  
+                local _, out = pcall(function()  
                     newInstance = Instance.new(classInfo.Name, selectionService:Get()[1] or workspace)
                 end)
 
@@ -73,7 +67,10 @@ function commands:setupCommands()
             end)
         end
 
+        guiModule:rebuildUI()
     end)
+
+    guiModule:rebuildUI()
 end
 
 return commands
