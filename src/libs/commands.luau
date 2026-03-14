@@ -5,77 +5,52 @@ local guiModule = require(script.Parent.gui)
 local selectionService = game:GetService("Selection")
 local reflectionService = game:GetService("ReflectionService")
 
---// Insert a command into the gui
-function insertCommand(title, callback)
-    guiModule:addCommand(title, callback)
-end
-
 --// Setup the commands for our palette
 function commands:setupCommands()
 
-    -- Reset commands
-    guiModule.registeredCommands = {}
-    guiModule:rebuildUI()
+    guiModule:addCommands({
+        {
+            title = "Create Instance",
+            callback = function()
+                local instanceCommands = {}
 
-    -- Create a Instance into Workspace
-    insertCommand("Create Instance", function()  
+                for _, classInfo in reflectionService:GetClasses({ IsA = "Instance" }) do
+                    local requiredCapability = reflectionService:GetClass(classInfo.Name).Permits.New
+                    local currentCapability = SecurityCapabilities.fromCurrent()
 
-        -- Remove all commands
-        guiModule.registeredCommands = {}
+                    if not requiredCapability then continue end
+                    if not currentCapability:Contains(requiredCapability) then continue end
 
-        -- Create all classes as buttons.
-        for _, classInfo in reflectionService:GetClasses({
-            IsA = "Instance"
-        }) do
+                    table.insert(instanceCommands, {
+                        title = classInfo.Name,
+                        callback = function()
+                            local newInstance
+                            local _, out = pcall(function()
+                                newInstance = Instance.new(classInfo.Name, selectionService:Get()[1] or workspace)
+                            end)
 
-            local requiredCapability = reflectionService:GetClass(classInfo.Name).Permits.New
-            local currentCapability = SecurityCapabilities.fromCurrent()
+                            if not newInstance then
+                                warn(out)
+                            else
+                                selectionService:Remove(selectionService:Get())
+                                selectionService:Add({ newInstance })
+                            end
 
-            -- Does it have capabilities? If not then dont add
-            if not requiredCapability then 
-                continue
-            end
-
-            -- Does it contain our currentCapability? If not then dont add
-            if not currentCapability:Contains(requiredCapability) then
-                continue
-            end
-
-            -- Insert the instance as a command!
-            insertCommand(classInfo.Name, function()  
-                -- Attempt to create Instance
-                local newInstance
-                local _, out = pcall(function()  
-                    newInstance = Instance.new(classInfo.Name, selectionService:Get()[1] or workspace)
-                end)
-
-                -- Instance.new errored!
-                if not newInstance then 
-                    warn(out)
-                else
-                    -- Select instance!
-                    selectionService:Remove(selectionService:Get())
-                    selectionService:Add({
-                        newInstance
+                            guiModule:closePalette()
+                        end
                     })
                 end
 
-                -- Reset
-                commands:setupCommands()
-            end)
-        end
-
-        guiModule:rebuildUI()
-    end)
-
-    -- test searching!
-    insertCommand("ReplicatedStorage", function()  end)
-    insertCommand("ServerScriptService", function()  end)
-    insertCommand("Gizzy is Gay", function()  end)
-    insertCommand("YouTube", function()  end)
-    insertCommand("Hack Club", function()  end)
-
-    guiModule:rebuildUI()
+                guiModule.registeredCommands = {}
+                guiModule:addCommands(instanceCommands)
+            end
+        },
+        { title = "ReplicatedStorage",  callback = function() end },
+        { title = "ServerScriptService", callback = function() end },
+        { title = "Gizzy is Gay",        callback = function() end },
+        { title = "YouTube",             callback = function() end },
+        { title = "Hack Club",           callback = function() end },
+    })
 end
 
 return commands

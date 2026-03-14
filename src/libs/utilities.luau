@@ -11,6 +11,16 @@ function utiltiesModules:fuzzySearch(query : string, target : string): (boolean,
         return true, 0
     end
 
+    -- Prefix match
+    if target:sub(1, #query) == query then
+        return true, 5000 + (100 - #target)
+    end
+
+    -- Substring match (not at start)
+    if target:find(query, 1, true) then
+        return true, 1000
+    end
+
     -- Set default variables
     local score = 0
     local queryIndex = 1

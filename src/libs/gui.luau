@@ -1,6 +1,9 @@
 local guiModule = {}
 
 local searchModule = require(script.Parent.search)
+local RunService = game:GetService("RunService")
+
+local freezeFrame = nil
 
 --// The color palette we use! (Catppuccin Mocha)
 local colorPalette = {
@@ -40,6 +43,9 @@ local colorPalette = {
     Flamingo  = Color3.fromRGB(242, 205, 205),
     Rosewater = Color3.fromRGB(245, 224, 220),
 }
+
+--// The current selected command (via up/down arrow)
+guiModule.selectedCommand = nil
 
 --// Holds all registered commands (source of truth for search)
 guiModule.registeredCommands = {}
@@ -265,7 +271,6 @@ function createCommandPreview(parent : Instance, title : string, callback : () -
     })
 
     -- Setup the callback
-
     Command.Activated:Connect(callback)
 
     -- Register our new command ui in the table
@@ -273,6 +278,7 @@ function createCommandPreview(parent : Instance, title : string, callback : () -
         guiModule.guiElements.Gui.Commands,
         {
             title = title,
+            callback = callback,
             commandFrame = Command
         }
     )
@@ -304,6 +310,41 @@ function getOpenGui()
     return game:GetService("CoreGui"):FindFirstChild("cmdle")
 end
 
+--// Scroll to the selected button
+function scrollToSelected()
+    
+    -- Find our scrollingFrame
+    local scrolling : ScrollingFrame = guiModule.guiElements.Gui.CommandsScrolling
+    if not scrolling then
+        return
+    end
+
+    -- Get index & return if non-existing
+    local idx = guiModule.selectedCommand
+
+    if not idx then
+        return
+    end
+
+    -- Define our heights
+    local itemHeight = 26
+    local frameHeight = scrolling.AbsoluteSize.Y
+
+    -- Set itemTop/Bottom
+    local itemTop = (idx - 1) * itemHeight
+    local itemBottom = itemTop + itemHeight
+
+    -- Get our currentScroll
+    local currentScroll = scrolling.CanvasPosition.Y
+
+    -- Start scrolling up/down
+    if itemBottom > currentScroll + frameHeight then
+        scrolling.CanvasPosition = Vector2.new(0, itemBottom - frameHeight)
+    elseif itemTop < currentScroll then
+        scrolling.CanvasPosition = Vector2.new(0, itemTop)
+    end
+end
+
 --// Rebuilds the UI (refreshes commands)
 function guiModule:rebuildUI()
     -- Get the textbox from gui.luau!
@@ -317,12 +358,56 @@ function guiModule:rebuildUI()
         filtered = guiModule.registeredCommands
     end
 
+    -- Clamp selectedCommand
+    local count = #filtered
+    if count == 0 then
+        guiModule.selectedCommand = nil
+    else 
+        guiModule.selectedCommand = math.clamp(guiModule.selectedCommand or 1, 1, count)
+    end
+
     -- remove all existing commands
     removeAllCommands()
 
-    -- add all commands back.
-    for _, cmd in filtered do
-        createCommandPreview(guiModule.guiElements.Gui.CommandsScrolling, cmd.title, cmd.callback, false)
+    -- add all commands back w/ selection.
+    for i, cmd in filtered do
+        local isSelected = (i == guiModule.selectedCommand)
+        createCommandPreview(guiModule.guiElements.Gui.CommandsScrolling, cmd.title, cmd.callback, isSelected)
+    end
+
+    scrollToSelected()
+end
+
+--// Move selection up (-1) or down (+1)
+function guiModule:moveSelection(delta : number)
+    local count = #guiModule.guiElements.Gui.Commands
+
+    -- Is 0? Return.
+    if count == 0 then
+        return
+    end
+
+    -- Set selection
+    local currentCommand = guiModule.selectedCommand or 1
+    guiModule.selectedCommand = math.clamp(currentCommand + delta, 1, count)
+
+    -- Refresh UI
+    guiModule:rebuildUI()
+end
+
+--// Activate our selected command
+function guiModule:activateSelected()
+    local idx = guiModule.selectedCommand
+
+    -- No index? return
+    if not idx then
+        return
+    end
+
+    -- Fire our entry!
+    local entry = guiModule.guiElements.Gui.Commands[idx]
+    if entry then
+        entry.callback()
     end
 end
 
@@ -335,11 +420,25 @@ function setupSearch()
     end)
 end
 
+--// Add singular command
 function guiModule:addCommand( title : string, callback : () -> ())
     table.insert(guiModule.registeredCommands, {
         title = title,
         callback = callback
     })
+end
+
+--// Batch add commands (for performance)
+function guiModule:addCommands(commands : {{title: string, callback: () -> ()}})
+    -- Reset
+    guiModule.registeredCommands = {}
+
+    -- Insert commands into registered
+    for _, cmd in commands do 
+        table.insert(guiModule.registeredCommands, cmd)
+    end
+
+    -- Rebuild at end
     guiModule:rebuildUI()
 end
 
@@ -364,12 +463,26 @@ function guiModule:openPalette()
 
     -- Finally setup the search
     setupSearch()
+
+    -- Clean selected command
+    guiModule.selectedCommand = 1
+
+    -- Temporary way to sink arrow input
+    local lockedCF = workspace.CurrentCamera.CFrame
+    freezeFrame = RunService.RenderStepped:Connect(function()
+        workspace.CurrentCamera.CFrame = CFrame.new(lockedCF.Position) * workspace.CurrentCamera.CFrame.Rotation
+    end)
 end
 
 --// Close the palette gui (Destroy it)
 function guiModule:closePalette()
     -- Grab the GUI
     local openGui = getOpenGui()
+
+    -- Disable connection
+    if freezeFrame then
+        freezeFrame:Disconnect()
+    end
 
     -- Destroy
     if openGui then

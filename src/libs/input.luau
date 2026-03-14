@@ -1,5 +1,6 @@
 local InputModule = {}
 
+local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 
 local commandsModule = require(script.Parent.commands)
@@ -12,6 +13,9 @@ local SetBinds = {
     "LeftShift",
     "C"
 }
+
+--// Hold connection for arrow keys
+local holdConnection = nil
 
 --// Checks if the passed key is down
 function isKeyDown(key : string)
@@ -27,6 +31,43 @@ function keybindsDown(binds)
     end
 
     return true
+end
+
+--// Cancel active hold loop
+function cancelHold()
+    if holdConnection then
+        holdConnection:Disconnect()
+        holdConnection = nil
+    end
+end
+
+--// Start holding
+function startHold(delta : number)
+    -- Cancel hold
+    cancelHold()
+
+    -- Default definitions
+    local elapsedTime = 0
+    local repeating = false
+
+    -- Set the holdConnection on heartbeat
+    holdConnection = RunService.Heartbeat:Connect(function(dt)
+        elapsedTime += dt
+
+        -- Are we repeating? if not then start.
+        if not repeating then
+            if elapsedTime >= 0.4 then
+                repeating = true
+                elapsedTime = 0
+            end
+        else 
+            -- Start repeating!
+            if elapsedTime >= 0.07 then
+                elapsedTime = 0
+                guiModule:moveSelection(delta)
+            end
+        end
+    end)
 end
 
 --// This starts the Input module.
@@ -49,7 +90,6 @@ function InputModule:startModule()
             end
 
             -- Get pos, size and mouse pos
-
             local pos = palette.AbsolutePosition
             local size = palette.AbsoluteSize
             local mouse = input.Position
@@ -64,12 +104,33 @@ function InputModule:startModule()
             end
         end
 
-        -- Are they down noo-ww?
-        if not keybindsDown(SetBinds) then return end
+        -- Arrow key input!
+        if input.KeyCode == Enum.KeyCode.Up then
+            -- Move upwards
+            guiModule:moveSelection(-1)
+            startHold(-1)
+        elseif input.KeyCode == Enum.KeyCode.Down then
+            -- Move downwards
+            guiModule:moveSelection(1)
+            startHold(1)
+        elseif input.KeyCode == Enum.KeyCode.Return then
+            -- Enter/activate callback()
+            guiModule:activateSelected()
+        end
 
-        -- Open palette & register commands
-        gui:openPalette()
-        commandsModule:setupCommands()
+        -- Are the binds down?
+        if keybindsDown(SetBinds) then 
+            -- Open palette & register commands
+            gui:openPalette()
+            commandsModule:setupCommands()
+        end
+    end)
+
+    -- Handles cancelling the hold function
+    UserInputService.InputEnded:Connect(function(input)
+        if input.KeyCode == Enum.KeyCode.Up or input.KeyCode == Enum.KeyCode.Down then 
+            cancelHold() 
+        end
     end)
 end
 
