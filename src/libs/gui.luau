@@ -102,7 +102,8 @@ function createPalette(parent : Instance)
         AnchorPoint = Vector2.new(0.5, 0),
         Position = UDim2.new(0.5, 0, 0, 40),
 
-        Active = true
+        Active = true,
+        ClipsDescendants = true
     })
 
     -- Create the UICorner
