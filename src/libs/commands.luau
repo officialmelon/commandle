@@ -1,11 +1,9 @@
 local commands = {}
 
 local guiModule = require(script.Parent.gui)
-local utilityModule = require(script.Parent.utilities)
 
 local selectionService = game:GetService("Selection")
 local reflectionService = game:GetService("ReflectionService")
-local gui = require(script.Parent.gui)
 
 --// Insert a command into the gui
 function insertCommand(title, callback)
@@ -69,6 +67,13 @@ function commands:setupCommands()
 
         guiModule:rebuildUI()
     end)
+
+    -- test searching!
+    insertCommand("ReplicatedStorage", function()  end)
+    insertCommand("ServerScriptService", function()  end)
+    insertCommand("Gizzy is Gay", function()  end)
+    insertCommand("YouTube", function()  end)
+    insertCommand("Hack Club", function()  end)
 
     guiModule:rebuildUI()
 end
