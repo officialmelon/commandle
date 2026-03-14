@@ -5,38 +5,8 @@ local guiModule = require(script.Parent.gui)
 local selectionService = game:GetService("Selection")
 local reflectionService = game:GetService("ReflectionService")
 
---// Used for requesting className of instance, then running callback with the chosen name
-function requestClassName(callback : (className : string) -> ())
-    local instanceCommands = {}
-
-    for _, classInfo in reflectionService:GetClasses({ IsA = "Instance" }) do
-        local requiredCapability = reflectionService:GetClass(classInfo.Name).Permits.New
-        local currentCapability = SecurityCapabilities.fromCurrent()
-
-        if not requiredCapability then continue end
-        if not currentCapability:Contains(requiredCapability) then continue end
-
-        local capturedName = classInfo.Name
-        table.insert(instanceCommands, {
-            title = capturedName,
-            callback = function()
-                callback(capturedName)
-            end
-        })
-    end
-
-    table.insert(instanceCommands, 1, {
-        title = "Specify an instance type:",
-        callback = function() end
-    })
-
-    guiModule:pushCommands(instanceCommands)
-end
-
---// Setup the commands for our palette
-function commands:setupCommands()
-
-    guiModule:addCommands({
+--// Default commands created on start/main menu
+commands.defaultCommands = {
         -- Create instance command
         {
             title = "Instance: Create Instance",
@@ -146,8 +116,79 @@ function commands:setupCommands()
                     guiModule:closePalette()
                 end)
             end
+        },
+        -- Select theme
+        {
+            title = "Themes: Select an installed theme",
+
+            callback = function()
+                requestTheme(function(themeName : string)
+                   guiModule.selectedPalette = themeName
+                   guiModule:rebuildTheme()
+                end)
+            end
         }
+}
+
+--// Used for requesting className of instance, then running callback with the chosen name
+function requestClassName(callback : (className : string) -> ())
+    local instanceCommands = {}
+
+    for _, classInfo in reflectionService:GetClasses({ IsA = "Instance" }) do
+        local requiredCapability = reflectionService:GetClass(classInfo.Name).Permits.New
+        local currentCapability = SecurityCapabilities.fromCurrent()
+
+        if not requiredCapability then continue end
+        if not currentCapability:Contains(requiredCapability) then continue end
+
+        local capturedName = classInfo.Name
+        table.insert(instanceCommands, {
+            title = capturedName,
+            callback = function()
+                callback(capturedName)
+            end
+        })
+    end
+
+    table.insert(instanceCommands, 1, {
+        title = "Specify an instance type:",
+        callback = function() end
     })
+
+    guiModule:pushCommands(instanceCommands)
+end
+
+--// Used for requesting a custom theme from installed ones
+function requestTheme(callback : (themeName : string) -> ())
+    local themeCommands = {}
+
+    for key, theme in guiModule.colorPalette do
+        table.insert(themeCommands, {
+            title = key,
+            callback = function()
+                callback(key)
+            end
+        })
+    end
+
+    table.insert(themeCommands, 1, {
+        title = "Select a theme:",
+        callback = function() end
+    })
+
+    table.insert(themeCommands, (#themeCommands + 1), {
+        title = "Save & Return",
+        callback = function()
+            guiModule:popCommands()
+        end
+    })
+
+    guiModule:pushCommands(themeCommands)
+end
+
+--// Setup the commands for our palette
+function commands:setupCommands()
+    guiModule:addCommands(commands.defaultCommands)
 end
 
 return commands

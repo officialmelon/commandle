@@ -3,6 +3,7 @@ local PluginModule = {}
 --// require our input module
 local inputModule = require(script.Parent.input)
 local commandsModule = require(script.Parent.commands)
+local crossCommsModule = require(script.Parent.cross_communication)
 
 --[[
 These are some utility functions used for easier code!
@@ -30,6 +31,9 @@ function PluginModule:startPlugin()
 
     -- Insert all commands from module
     commandsModule:setupCommands()    
+
+    -- Cross communications setup
+    crossCommsModule:setupModule()
 end
 
 --// Creates the plugin in the toolbar, and runs startPlugin

@@ -6,43 +6,161 @@ local TweenService = game:GetService("TweenService")
 
 local freezeFrame = nil
 
---// The color palette we use! (Catppuccin Mocha)
-local colorPalette = {
-	-- Bases
-	Crust = Color3.fromRGB(17, 17, 27),
-	Mantle = Color3.fromRGB(24, 24, 37),
-	Base = Color3.fromRGB(30, 30, 46),
+--// The color palette we use! (Catppuccin Mocha is default)
+guiModule.selectedPalette = "Mocha"
 
-	-- Surfaces
-	Surface0 = Color3.fromRGB(49, 50, 68),
-	Surface1 = Color3.fromRGB(69, 71, 90),
-	Surface2 = Color3.fromRGB(88, 91, 112),
+guiModule.colorPalette = {
+	Latte = {
+		-- Bases
+		Crust = Color3.fromRGB(220, 224, 232),
+		Mantle = Color3.fromRGB(230, 233, 239),
+		Base = Color3.fromRGB(239, 241, 245),
 
-	-- Overlays
-	Overlay0 = Color3.fromRGB(108, 112, 134),
-	Overlay1 = Color3.fromRGB(127, 132, 156),
-	Overlay2 = Color3.fromRGB(147, 153, 178),
+		-- Surfaces
+		Surface0 = Color3.fromRGB(204, 208, 218),
+		Surface1 = Color3.fromRGB(188, 192, 204),
+		Surface2 = Color3.fromRGB(172, 176, 190),
 
-	-- Text
-	Subtext0 = Color3.fromRGB(166, 173, 200),
-	Subtext1 = Color3.fromRGB(186, 194, 222),
-	Text = Color3.fromRGB(205, 214, 244),
+		-- Overlays
+		Overlay0 = Color3.fromRGB(156, 160, 176),
+		Overlay1 = Color3.fromRGB(140, 143, 161),
+		Overlay2 = Color3.fromRGB(124, 127, 147),
 
-	-- Accent colors
-	Lavender = Color3.fromRGB(180, 190, 254),
-	Blue = Color3.fromRGB(137, 180, 250),
-	Sapphire = Color3.fromRGB(116, 199, 236),
-	Sky = Color3.fromRGB(137, 220, 235),
-	Teal = Color3.fromRGB(148, 226, 213),
-	Green = Color3.fromRGB(166, 227, 161),
-	Yellow = Color3.fromRGB(249, 226, 175),
-	Peach = Color3.fromRGB(250, 179, 135),
-	Maroon = Color3.fromRGB(235, 160, 172),
-	Red = Color3.fromRGB(243, 139, 168),
-	Mauve = Color3.fromRGB(203, 166, 247),
-	Pink = Color3.fromRGB(245, 194, 231),
-	Flamingo = Color3.fromRGB(242, 205, 205),
-	Rosewater = Color3.fromRGB(245, 224, 220),
+		-- Text
+		Subtext0 = Color3.fromRGB(108, 111, 133),
+		Subtext1 = Color3.fromRGB(92, 95, 119),
+		Text = Color3.fromRGB(76, 79, 105),
+
+		-- Accents
+		Lavender = Color3.fromRGB(114, 135, 253),
+		Blue = Color3.fromRGB(30, 102, 245),
+		Sapphire = Color3.fromRGB(32, 159, 181),
+		Sky = Color3.fromRGB(4, 165, 229),
+		Teal = Color3.fromRGB(23, 146, 153),
+		Green = Color3.fromRGB(64, 160, 43),
+		Yellow = Color3.fromRGB(223, 142, 29),
+		Peach = Color3.fromRGB(254, 100, 11),
+		Maroon = Color3.fromRGB(230, 69, 83),
+		Red = Color3.fromRGB(210, 15, 57),
+		Mauve = Color3.fromRGB(136, 57, 239),
+		Pink = Color3.fromRGB(234, 118, 203),
+		Flamingo = Color3.fromRGB(221, 120, 120),
+		Rosewater = Color3.fromRGB(220, 138, 120),
+	},
+
+	Frappe = {
+		-- Bases
+		Crust = Color3.fromRGB(35, 38, 52),
+		Mantle = Color3.fromRGB(41, 44, 60),
+		Base = Color3.fromRGB(48, 52, 70),
+
+		-- Surfaces
+		Surface0 = Color3.fromRGB(65, 69, 89),
+		Surface1 = Color3.fromRGB(81, 87, 109),
+		Surface2 = Color3.fromRGB(98, 104, 128),
+
+		-- Overlays
+		Overlay0 = Color3.fromRGB(115, 121, 148),
+		Overlay1 = Color3.fromRGB(131, 139, 167),
+		Overlay2 = Color3.fromRGB(148, 156, 187),
+
+		-- Text
+		Subtext0 = Color3.fromRGB(165, 173, 206),
+		Subtext1 = Color3.fromRGB(181, 191, 226),
+		Text = Color3.fromRGB(198, 208, 245),
+
+		-- Accents
+		Lavender = Color3.fromRGB(186, 187, 241),
+		Blue = Color3.fromRGB(140, 170, 238),
+		Sapphire = Color3.fromRGB(133, 193, 220),
+		Sky = Color3.fromRGB(153, 209, 219),
+		Teal = Color3.fromRGB(129, 200, 190),
+		Green = Color3.fromRGB(166, 209, 137),
+		Yellow = Color3.fromRGB(229, 200, 144),
+		Peach = Color3.fromRGB(239, 159, 118),
+		Maroon = Color3.fromRGB(234, 153, 156),
+		Red = Color3.fromRGB(231, 130, 132),
+		Mauve = Color3.fromRGB(202, 158, 230),
+		Pink = Color3.fromRGB(244, 184, 228),
+		Flamingo = Color3.fromRGB(238, 190, 190),
+		Rosewater = Color3.fromRGB(242, 213, 207),
+	},
+
+	Macchiato = {
+		-- Bases
+		Crust = Color3.fromRGB(24, 25, 38),
+		Mantle = Color3.fromRGB(30, 32, 48),
+		Base = Color3.fromRGB(36, 39, 58),
+
+		-- Surfaces
+		Surface0 = Color3.fromRGB(54, 58, 79),
+		Surface1 = Color3.fromRGB(73, 77, 100),
+		Surface2 = Color3.fromRGB(91, 96, 120),
+
+		-- Overlays
+		Overlay0 = Color3.fromRGB(110, 115, 141),
+		Overlay1 = Color3.fromRGB(128, 135, 162),
+		Overlay2 = Color3.fromRGB(147, 154, 183),
+
+		-- Text
+		Subtext0 = Color3.fromRGB(165, 173, 203),
+		Subtext1 = Color3.fromRGB(184, 192, 224),
+		Text = Color3.fromRGB(202, 211, 245),
+
+		-- Accents
+		Lavender = Color3.fromRGB(183, 189, 248),
+		Blue = Color3.fromRGB(138, 173, 244),
+		Sapphire = Color3.fromRGB(125, 196, 228),
+		Sky = Color3.fromRGB(145, 215, 227),
+		Teal = Color3.fromRGB(139, 213, 202),
+		Green = Color3.fromRGB(166, 218, 149),
+		Yellow = Color3.fromRGB(238, 212, 159),
+		Peach = Color3.fromRGB(245, 169, 127),
+		Maroon = Color3.fromRGB(238, 153, 160),
+		Red = Color3.fromRGB(237, 135, 150),
+		Mauve = Color3.fromRGB(198, 160, 246),
+		Pink = Color3.fromRGB(245, 189, 230),
+		Flamingo = Color3.fromRGB(240, 198, 198),
+		Rosewater = Color3.fromRGB(244, 219, 214),
+	},
+
+	Mocha = {
+		-- Bases
+		Crust = Color3.fromRGB(17, 17, 27),
+		Mantle = Color3.fromRGB(24, 24, 37),
+		Base = Color3.fromRGB(30, 30, 46),
+
+		-- Surfaces
+		Surface0 = Color3.fromRGB(49, 50, 68),
+		Surface1 = Color3.fromRGB(69, 71, 90),
+		Surface2 = Color3.fromRGB(88, 91, 112),
+
+		-- Overlays
+		Overlay0 = Color3.fromRGB(108, 112, 134),
+		Overlay1 = Color3.fromRGB(127, 132, 156),
+		Overlay2 = Color3.fromRGB(147, 153, 178),
+
+		-- Text
+		Subtext0 = Color3.fromRGB(166, 173, 200),
+		Subtext1 = Color3.fromRGB(186, 194, 222),
+		Text = Color3.fromRGB(205, 214, 244),
+
+		-- Accents
+		Lavender = Color3.fromRGB(180, 190, 254),
+		Blue = Color3.fromRGB(137, 180, 250),
+		Sapphire = Color3.fromRGB(116, 199, 236),
+		Sky = Color3.fromRGB(137, 220, 235),
+		Teal = Color3.fromRGB(148, 226, 213),
+		Green = Color3.fromRGB(166, 227, 161),
+		Yellow = Color3.fromRGB(249, 226, 175),
+		Peach = Color3.fromRGB(250, 179, 135),
+		Maroon = Color3.fromRGB(235, 160, 172),
+		Red = Color3.fromRGB(243, 139, 168),
+		Mauve = Color3.fromRGB(203, 166, 247),
+		Pink = Color3.fromRGB(245, 194, 231),
+		Flamingo = Color3.fromRGB(242, 205, 205),
+		Rosewater = Color3.fromRGB(245, 224, 220),
+	},
 }
 
 --// The current selected command (via up/down arrow)
@@ -53,6 +171,21 @@ guiModule.registeredCommands = {}
 
 --// Holds all the navigationStack commands (esc)
 guiModule.navigationStack = {}
+
+--// Type check
+
+type GuiElements = {
+	Palette: Frame?,
+	Input: Frame?,
+	CommandsScrolling: ScrollingFrame?,
+	Commands: {
+		{
+			title : string?,
+			callback: () -> ()?,
+			commandFrame: TextButton
+		}
+	}
+}
 
 --// This holds all the GUI elements for both plugin & gui!
 guiModule.guiElements = {
@@ -70,7 +203,7 @@ guiModule.guiElements = {
 
 		-- Holds all commands in the gui
 		Commands = {},
-	},
+	} :: GuiElements,
 }
 
 --[[
@@ -98,7 +231,7 @@ function createPalette(parent: Instance)
 		Name = "Palette",
 		Parent = parent,
 
-		BackgroundColor3 = colorPalette.Surface0,
+		BackgroundColor3 = guiModule.colorPalette[guiModule.selectedPalette].Surface0,
 
 		Size = UDim2.new(0, 660, 0, 490),
 		AnchorPoint = Vector2.new(0.5, 0),
@@ -125,7 +258,7 @@ function createPalette(parent: Instance)
 		BorderStrokePosition = Enum.BorderStrokePosition.Outer,
 		LineJoinMode = Enum.LineJoinMode.Round,
 
-		Color = colorPalette.Surface2,
+		Color = guiModule.colorPalette[guiModule.selectedPalette].Surface2,
 		Thickness = 1,
 	})
 
@@ -142,7 +275,7 @@ function createInputArea(parent: Instance)
 		Name = "Input",
 		Parent = parent,
 
-		BackgroundColor3 = colorPalette.Surface0,
+		BackgroundColor3 = guiModule.colorPalette[guiModule.selectedPalette].Surface0,
 		Position = UDim2.new(0, 0, 0, 0),
 		Size = UDim2.new(1, 0, 0, 38),
 		Active = true,
@@ -169,8 +302,8 @@ function createInputArea(parent: Instance)
 		TextSize = 15,
 		PlaceholderText = "Search...",
 		Text = "",
-		PlaceholderColor3 = colorPalette.Subtext0,
-		TextColor3 = colorPalette.Subtext0,
+		PlaceholderColor3 = guiModule.colorPalette[guiModule.selectedPalette].Subtext0,
+		TextColor3 = guiModule.colorPalette[guiModule.selectedPalette].Subtext0,
 		TextXAlignment = Enum.TextXAlignment.Left,
 
 		ClearTextOnFocus = false,
@@ -193,7 +326,7 @@ function createSpacer(parent: Instance)
 		Position = UDim2.new(0, 0, 0, 38),
 		Size = UDim2.new(1, 0, 0, 1),
 
-		BackgroundColor3 = colorPalette.Surface2,
+		BackgroundColor3 = guiModule.colorPalette[guiModule.selectedPalette].Surface2,
 	})
 end
 
@@ -209,7 +342,7 @@ function createCommandsScrollingFrame(parent: Instance)
 		Size = UDim2.new(1, 0, 1, -39),
 
 		ScrollBarThickness = 4,
-		ScrollBarImageColor3 = colorPalette.Overlay0,
+		ScrollBarImageColor3 = guiModule.colorPalette[guiModule.selectedPalette].Overlay0,
 		CanvasSize = UDim2.new(0, 0, 0, 0),
 		AutomaticCanvasSize = Enum.AutomaticSize.Y,
 		ScrollingDirection = Enum.ScrollingDirection.Y,
@@ -236,7 +369,7 @@ function createCommandPreview(parent: Instance, title: string, callback: () -> (
 		Parent = parent,
 
 		Text = "",
-		BackgroundColor3 = isSelected and colorPalette.Surface1 or colorPalette.Surface0,
+		BackgroundColor3 = isSelected and guiModule.colorPalette[guiModule.selectedPalette].Surface1 or guiModule.colorPalette[guiModule.selectedPalette].Surface0,
 		Size = UDim2.new(1, 0, 0, 26),
 		BorderSizePixel = 0,
 	})
@@ -246,7 +379,7 @@ function createCommandPreview(parent: Instance, title: string, callback: () -> (
 		Name = "Selected",
 		Parent = Command,
 
-		BackgroundColor3 = colorPalette.Blue,
+		BackgroundColor3 = guiModule.colorPalette[guiModule.selectedPalette].Blue,
 
 		Position = UDim2.new(0, 0, 0, 0),
 		Size = UDim2.new(0, 2, 1, 0),
@@ -267,7 +400,7 @@ function createCommandPreview(parent: Instance, title: string, callback: () -> (
 
 		FontFace = Font.fromEnum(Enum.Font.Code),
 		TextSize = 13,
-		TextColor3 = colorPalette.Text,
+		TextColor3 = guiModule.colorPalette[guiModule.selectedPalette].Text,
 		Text = title,
 
 		TextXAlignment = Enum.TextXAlignment.Left,
@@ -476,6 +609,60 @@ function guiModule:popCommands()
 		guiModule:addCommands(prev)
 	else
 		guiModule:closePalette()
+	end
+end
+
+function guiModule:rebuildTheme()
+	local gui = guiModule.guiElements.Gui
+
+	-- Palette
+	if gui.Palette then
+		gui.Palette.BackgroundColor3 = guiModule.colorPalette[guiModule.selectedPalette].Surface0
+		local stroke : UIStroke = gui.Palette:FindFirstChild("UIStroke")
+		if stroke then
+			stroke.Color = guiModule.colorPalette[guiModule.selectedPalette].Surface2
+		end
+	end
+
+	-- Input
+	if gui.Input then
+		gui.Input.BackgroundColor3 = guiModule.colorPalette[guiModule.selectedPalette].Surface0
+		local textBox : TextBox = gui.Input:FindFirstChild("TextBox")
+		if textBox then
+			textBox.PlaceholderColor3 = guiModule.colorPalette[guiModule.selectedPalette].Subtext0
+			textBox.TextColor3 = guiModule.colorPalette[guiModule.selectedPalette].Subtext0
+		end
+	end
+
+	-- Spacer
+	if gui.Palette then
+		local spacer : Frame = gui.Palette:FindFirstChild("Spacer")
+		if spacer then
+			spacer.BackgroundColor3 = guiModule.colorPalette[guiModule.selectedPalette].Surface2
+		end
+	end
+
+	-- CommandsScrolling
+	if gui.CommandsScrolling then 
+		gui.CommandsScrolling.ScrollBarImageColor3 = guiModule.colorPalette[guiModule.selectedPalette].Overlay0
+	end
+
+	-- Commands (dynamic, re-iterate if already rendered)
+	for i, cmd in gui.Commands do
+		local frame : TextButton = cmd.commandFrame
+		local isSelected = (i == guiModule.selectedCommand)
+
+		frame.BackgroundColor3 = isSelected and guiModule.colorPalette[guiModule.selectedPalette].Surface1 or guiModule.colorPalette[guiModule.selectedPalette].Surface0
+
+		local selectedBar = frame:FindFirstChild("Selected")
+		if selectedBar then
+			selectedBar.BackgroundColor3 = guiModule.colorPalette[guiModule.selectedPalette].Blue
+		end
+
+		local title = frame:FindFirstChild("Title")
+		if title then
+			title.TextColor3 = guiModule.colorPalette[guiModule.selectedPalette].Text
+		end
 	end
 end
 
