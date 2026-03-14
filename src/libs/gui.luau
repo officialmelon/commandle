@@ -7,10 +7,10 @@ local TweenService = game:GetService("TweenService")
 local freezeFrame = nil
 
 --// The color palette we use! (Catppuccin Mocha is default)
-guiModule.selectedPalette = "Mocha"
+guiModule.selectedPalette = "Catppuccin - Mocha"
 
 guiModule.colorPalette = {
-	Latte = {
+	["Catppuccin - Latte"] = {
 		-- Bases
 		Crust = Color3.fromRGB(220, 224, 232),
 		Mantle = Color3.fromRGB(230, 233, 239),
@@ -48,7 +48,7 @@ guiModule.colorPalette = {
 		Rosewater = Color3.fromRGB(220, 138, 120),
 	},
 
-	Frappe = {
+	["Catppuccin - Frappe"] = {
 		-- Bases
 		Crust = Color3.fromRGB(35, 38, 52),
 		Mantle = Color3.fromRGB(41, 44, 60),
@@ -86,7 +86,7 @@ guiModule.colorPalette = {
 		Rosewater = Color3.fromRGB(242, 213, 207),
 	},
 
-	Macchiato = {
+	["Catppuccin - Macchiato"] = {
 		-- Bases
 		Crust = Color3.fromRGB(24, 25, 38),
 		Mantle = Color3.fromRGB(30, 32, 48),
@@ -124,7 +124,7 @@ guiModule.colorPalette = {
 		Rosewater = Color3.fromRGB(244, 219, 214),
 	},
 
-	Mocha = {
+	["Catppuccin - Mocha"] = {
 		-- Bases
 		Crust = Color3.fromRGB(17, 17, 27),
 		Mantle = Color3.fromRGB(24, 24, 37),
@@ -160,6 +160,23 @@ guiModule.colorPalette = {
 		Pink = Color3.fromRGB(245, 194, 231),
 		Flamingo = Color3.fromRGB(242, 205, 205),
 		Rosewater = Color3.fromRGB(245, 224, 220),
+	},
+
+	["Roblox Studio - Dark"] = {
+		-- Surfaces
+		Surface0 = Color3.fromRGB(25, 26, 31),
+		Surface1 = Color3.fromRGB(44, 45, 51),
+		Surface2 = Color3.fromRGB(52, 53, 57),
+
+		-- Text
+		Subtext0 = Color3.fromRGB(187, 188, 190), 
+		Text     = Color3.fromRGB(212, 212, 212),
+
+		-- Scroll
+		Overlay0 = Color3.fromRGB(52, 53, 57),
+
+		-- Accent
+		Blue = Color3.fromRGB(51, 95, 255),
 	},
 }
 

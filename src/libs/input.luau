@@ -9,9 +9,8 @@ local guiModule = require(script.Parent.gui)
 
 --// Binds that need to be pressed to open up!
 local SetBinds = {
-    "LeftControl",
     "LeftShift",
-    "C"
+    "F"
 }
 
 --// Hold connection for arrow keys
