@@ -266,7 +266,6 @@ function createCommandPreview(parent : Instance, title : string, callback : () -
 
     -- Setup the callback
 
-    print(callback)
     Command.Activated:Connect(callback)
 
     -- Register our new command ui in the table
