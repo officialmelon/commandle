@@ -50,6 +50,9 @@ guiModule.selectedCommand = nil
 --// Holds all registered commands (source of truth for search)
 guiModule.registeredCommands = {}
 
+--// Holds all the navigationStack commands (esc)
+guiModule.navigationStack = {}
+
 --// This holds all the GUI elements for both plugin & gui!
 guiModule.guiElements = {
     -- This holds the plugin elements
@@ -443,12 +446,54 @@ function guiModule:addCommands(commands : {{title: string, callback: () -> ()}})
     guiModule:rebuildUI()
 end
 
+--// Pushes commands on navigation stack
+function guiModule:pushCommands(commands)
+    -- Insert registered commands into the stack
+    table.insert(guiModule.navigationStack, guiModule.registeredCommands)
+
+    -- reset registered commands
+    guiModule.registeredCommands = {}
+
+    -- loop through commands
+    for _, cmd in commands do
+        table.insert(guiModule.registeredCommands, cmd)
+    end
+
+    -- get the selected command
+    guiModule.selectedCommand = 1
+
+    -- finally, we rebuild
+    guiModule:rebuildUI()
+end
+
+--// Pops navigation stack commands
+function guiModule:popCommands()
+
+    -- previous
+    local prev = table.remove(guiModule.navigationStack)
+
+    -- does previous exist?
+    if prev then
+        guiModule.registeredCommands = prev
+        guiModule.selectedCommand = 1
+        guiModule:addCommands(prev)
+    else 
+        guiModule:closePalette()
+    end
+end
+
 --// Open the palette gui!
 function guiModule:openPalette()
+
+    -- Reset nav stack.
+    guiModule.navigationStack = {}
+
+    -- Is gui open? if so, close so we can re-open after.
     if getOpenGui() then
         guiModule:closePalette()
     end
 
+    -- Create our screenGui holder
     local screenGui = createInstance("ScreenGui", {
         Parent = game:GetService("CoreGui"),
         Name = "cmdle",

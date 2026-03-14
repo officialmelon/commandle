@@ -77,7 +77,7 @@ function InputModule:startModule()
 
         -- Escape pressed? If so then close.
         if isKeyDown("Escape") then
-            gui:closePalette()
+            gui:popCommands()
         end
 
         -- Did we click off the frame? If so then close
