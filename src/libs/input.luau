@@ -70,36 +70,69 @@ function startHold(delta : number)
 end
 
 --// This starts the Input module.
-function InputModule:startModule()
+function InputModule:startModule(plugin : Plugin)
+
+    local openAction = plugin:CreatePluginAction(
+        "openCommandPalette",
+        "Open Command Palette",
+        "Opens the command palette",
+        "", -- TODO: Icon
+        true
+    )
+
+    local closeAction = plugin:CreatePluginAction(
+        "closeCommandPalette",
+        "Close Command Palette",
+        "Closes the command palette",
+        "", -- TODO: Icon
+        true
+    )
+
+    -- Binds down shortcut!
+    openAction.Triggered:Connect(function()
+       -- Open palette, setup commands
+       gui:openPalette()
+       commandsModule:setupCommands()
+    end)
+
+    -- Close action shortcut
+    closeAction.Triggered:Connect(function()
+        -- Pop that palette!
+        guiModule:popCommands()
+    end)
+
     -- Input began?
     UserInputService.InputBegan:Connect(function(input)
 
-        -- Escape pressed? If so then close.
+        -- Escape pressed? If so then close. (fallback)
         if isKeyDown("Escape") then
             gui:popCommands()
         end
+        
+        -- If user clicks off, should we close?
+        if _G.preferences.closeOnFocusLost then
+            -- Did we click off the frame? If so then close
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then
 
-        -- Did we click off the frame? If so then close
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                -- Get the palette frame & check if not nil
+                local palette = gui.guiElements.Gui.Palette
+                if not palette then 
+                    return
+                end
 
-            -- Get the palette frame & check if not nil
-            local palette = gui.guiElements.Gui.Palette
-            if not palette then 
-                return
-            end
+                -- Get pos, size and mouse pos
+                local pos = palette.AbsolutePosition
+                local size = palette.AbsoluteSize
+                local mouse = input.Position
 
-            -- Get pos, size and mouse pos
-            local pos = palette.AbsolutePosition
-            local size = palette.AbsoluteSize
-            local mouse = input.Position
+                -- Are we inside the frame?
+                local insideX = mouse.X >= pos.X and mouse.X <= pos.X + size.X
+                local insideY = mouse.Y >= pos.Y and mouse.Y <= pos.Y + size.Y
 
-            -- Are we inside the frame?
-            local insideX = mouse.X >= pos.X and mouse.X <= pos.X + size.X
-            local insideY = mouse.Y >= pos.Y and mouse.Y <= pos.Y + size.Y
-
-            -- If we aren't then close.
-            if not (insideX and insideY) then
-                guiModule:closePalette()
+                -- If we aren't then close.
+                if not (insideX and insideY) then
+                    guiModule:closePalette()
+                end
             end
         end
 
@@ -117,7 +150,7 @@ function InputModule:startModule()
             guiModule:activateSelected()
         end
 
-        -- Are the binds down?
+        -- Are the binds down? (fallback)
         if keybindsDown(SetBinds) then 
             -- Open palette & register commands
             gui:openPalette()

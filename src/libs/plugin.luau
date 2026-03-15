@@ -5,6 +5,12 @@ local inputModule = require(script.Parent.input)
 local commandsModule = require(script.Parent.commands)
 local crossCommsModule = require(script.Parent.cross_communication)
 
+--// Global plugin preferences table, saves on close.
+--// TODO: Save on close.
+_G.preferences = {
+    closeOnFocusLost = true
+}
+
 --[[
 These are some utility functions used for easier code!
 ]]
@@ -24,10 +30,10 @@ Handles the plugin creation & start.
 ]]
 
 --// This starts the plugin itself, registers functions etc
-function PluginModule:startPlugin()
+function PluginModule:startPlugin(plugin : Plugin)
 
 	-- Start the input module
-    inputModule:startModule()
+    inputModule:startModule(plugin)
 
     -- Insert all commands from module
     commandsModule:setupCommands()    
@@ -43,7 +49,7 @@ function PluginModule:createPlugin(plugin : Plugin)
 	local ToggleButton = createButton(Toolbar, "Commandle Toggle", "Disable/Enable commandle palette", "")
 
     -- Start the plugin
-    PluginModule:startPlugin()
+    PluginModule:startPlugin(plugin)
 	
 end
 

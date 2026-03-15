@@ -2,6 +2,7 @@ local commands = {}
 
 local guiModule = require(script.Parent.gui)
 
+local GuiService = game:GetService("GuiService")
 local Selection = game:GetService("Selection")
 local selectionService = game:GetService("Selection")
 local reflectionService = game:GetService("ReflectionService")
@@ -89,7 +90,7 @@ commands.defaultCommands = {
                 end
 
                 selectionService:Set({})
-                guiModule:closePalette()
+                guiModule:closePalette(false)
             end
         },
         -- Move selected to workspace root
@@ -142,6 +143,22 @@ commands.defaultCommands = {
                 for _, sel in selectionService:Get() do
                     if sel:IsA("BasePart") then
                         sel.CFrame = CFrame.new()
+                    end
+                end
+
+                guiModule:closePalette(false)
+            end
+        },
+        -- Print size, position
+        {
+            title = "BasePart: Print Size, Position and Rotation",
+
+            callback = function()
+                for _, sel in selectionService:Get() do
+                    if sel:IsA("BasePart") then
+                        print(sel:GetFullName(), "Size:", tostring(sel.Size))
+                        print(sel:GetFullName(), "Position:", tostring(sel.Position))
+                        print(sel:GetFullName(), "Rotation:", tostring(sel.CFrame.Rotation))
                     end
                 end
 
@@ -378,6 +395,27 @@ commands.defaultCommands = {
                 end)
             end
         },
+        -- Select children by class
+        {
+            title = "Selection: Select Children by Class",
+
+            callback = function()
+                requestClassName(function(className: string)  
+                    local toSelect = {}
+                    
+                    for _, selection in selectionService:Get() do
+                        for _, child in selection:GetChildren() do
+                            if child.ClassName == className then
+                                table.insert(toSelect, child)
+                            end
+                        end
+                    end
+
+                    selectionService:Set(toSelect)
+                    guiModule:closePalette()
+                end)
+            end
+        },
         -- Teleport to selection
         {
             title = "Selection: Focus on selection",
@@ -398,6 +436,20 @@ commands.defaultCommands = {
                 -- Is selection a model?
                 if selection[1]:IsA("Model") then
                     workspace.CurrentCamera.Focus = (selection[1]:GetPivot() or selection[1].PrimaryPart.CFrame)
+                end
+
+                guiModule:closePalette(false)
+            end
+        },
+        -- Print Full Path
+        {
+            title = "Selection: Print Selection Path",
+
+            callback = function()
+                local selection = selectionService:Get()
+
+                for _, v in selection do
+                    print(v:GetFullName())
                 end
 
                 guiModule:closePalette(false)
@@ -572,6 +624,114 @@ commands.defaultCommands = {
 
                 guiModule:pushCommands(timeCmds)
             end
+        },
+        -- Toggle scripts
+        {
+            title = "Scripts: Toggle Enabled/Disabled",
+
+            callback = function()
+                local selection = selectionService:Get()
+                
+                for _, sel in selection do
+                    if sel:IsA("LuaSourceContainer") then
+                        sel.Enabled = not sel.Enabled
+                    end
+                end
+
+                guiModule:closePalette(false)
+            end
+        },
+        -- Move script to StarterPlayerScipts
+        {
+            title = "Scripts: Move to StarterPlayer",
+
+            callback = function()
+                local cmds = {
+
+                    -- Handles StarterPlayerScripts
+                    {
+                        title = "StarterPlayerScripts",
+
+                        callback = function()
+                            local selection = selectionService:Get()
+
+                            for _, sel in selection do
+                                if sel:IsA("LuaSourceContainer") then
+                                    sel.Parent = game:GetService("StarterPlayer").StarterPlayerScripts
+                                end
+                            end
+                        end
+                    },
+
+                    -- Handles StarterCharacterScripts
+                    {
+                        title = "StarterCharacterScripts",
+
+                        callback = function()
+                            local selection = selectionService:Get()
+
+                            for _, sel in selection do
+                                if sel:IsA("LuaSourceContainer") then
+                                    sel.Parent = game:GetService("StarterPlayer").StarterCharacterScripts
+                                end
+                            end
+                        end
+                    }
+                }
+
+                -- Push to stack.
+                guiModule:pushCommands(cmds)
+            end
+        },
+        -- Execute script
+        {
+            title = "Scripts: Run script",
+
+            callback = function()
+                local selection = selectionService:Get()
+
+                for _, sel in selection do
+                    if sel:IsA("LuaSourceContainer") then
+                        local fn, err = loadstring(sel.Source)
+
+                        if not fn then
+                            warn("Compile error in", sel:GetFullName(), "-", err)
+                            continue
+                        end
+
+                        fn = commands:setupLoadstringEnviroment(fn, sel)
+
+                        local ok, runErr = pcall(fn)
+
+                        if not ok then 
+                            warn("Runtime error in", sel:GetFullName(), "-", runErr)
+                        end
+                    end
+                end
+
+                guiModule:closePalette(false)
+            end
+        },
+        -- Commandle settings menu!
+        {
+            title = "Preferences: Commandle Settings",
+
+            callback = function()
+                local function buildPreferences()
+                    return {
+                        -- Change preference for closeOnFocusLost
+                        {
+                            title = "Close palette on focus loss (" .. tostring(_G.preferences.closeOnFocusLost) .. ")",
+                            callback = function()
+                                _G.preferences.closeOnFocusLost = not _G.preferences.closeOnFocusLost
+                                guiModule:pushCommands(buildPreferences())
+                            end
+                        }
+                    }
+                end
+
+                guiModule:pushCommands(buildPreferences())
+            end
         }
 }
 
@@ -629,6 +789,18 @@ function requestTheme(callback : (themeName : string) -> ())
     })
 
     guiModule:pushCommands(themeCommands)
+end
+
+--// Set enviroment for loadstring
+function commands:setupLoadstringEnviroment(fn : () -> (), script)
+
+    -- intellisense doesnt like the line below for some reason :sob:
+    setfenv(fn, setmetatable(
+        { script = script }, 
+        { __index = getfenv(0) }
+    ))
+    
+    return fn
 end
 
 --// Setup the commands for our palette
