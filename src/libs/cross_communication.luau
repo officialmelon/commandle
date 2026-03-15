@@ -16,9 +16,12 @@ local api_objects = {
     popRequest = nil,
     
     closePalette = nil,
-    openPalette = nil
+    openPalette = nil,
+    
+    requestTheme = nil,
 }
 
+--// This setups up communication for the bindables created by setupCommunication
 function setupCommunicationEvents()
     --[[
     commandTypes:
@@ -47,24 +50,36 @@ function setupCommunicationEvents()
         guiModule:rebuildUI()
     end)
 
+    -- push runs the push event! to temporarily push commands to the table.
     api_objects.pushRequest.Event:Connect(function(commandsTable : {{title : string, callback : () -> ()}})
         guiModule:pushCommands(commandsTable)
     end)
 
+    -- pop runs the pop event, which pops temporary lists of commands all the way to defaults and exits.
     api_objects.popRequest.Event:Connect(function()
         guiModule:popCommands()
     end)
 
+    -- explanatory, closes the palette! taking in a argument whether we should animate or not
     api_objects.closePalette.Event:Connect(function(shouldAnimate : boolean)
-        guiModule:closePalette(not shouldAnimate)
+        -- reverse it to make it less unreadable
+        guiModule:closePalette((not shouldAnimate) or false)
     end)
 
+    -- opens the palette!
     api_objects.openPalette.Event:Connect(function()
         guiModule:openPalette()
     end)
+
+    api_objects.requestTheme.Event:Connect(function(themeName, array)
+        assert(typeof(themeName) == "string" and typeof(array) == "table", "Commandle API: Invalid themeName or table!")
+        guiModule.colorPalette[themeName] = array
+    end)
 end
 
+--// This handles setting up binadable events for plugins to use
 function setupCommunication()
+    -- If we already exist then remove that API.
     if StudioService:FindFirstChild("commandle_api") then
         StudioService:FindFirstChild("commandle_api"):Destroy()
     end
@@ -99,19 +114,21 @@ function setupCommunication()
     openPalette.Parent = crossParent
     openPalette.Name = "openPalette"
 
+    -- Request a theme to be added to existing themes!
+    local requestTheme = Instance.new("BindableEvent")
+    requestTheme.Parent = crossParent
+    requestTheme.Name = "requestTheme"
+
     -- Assign API functions to module table!
     api_objects.createCommands = createCommands
-
     api_objects.pushRequest = pushRequest
-
     api_objects.popRequest = popRequest
-
     api_objects.closePalette = closePalette
-
     api_objects.openPalette = openPalette
-
+    api_objects.requestTheme = requestTheme
 end
 
+--// Runs the setup functions.
 function crossCommunicationModule:setupModule()
     setupCommunication()
     setupCommunicationEvents()

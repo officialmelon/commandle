@@ -178,6 +178,40 @@ guiModule.colorPalette = {
 		-- Accent
 		Blue = Color3.fromRGB(51, 95, 255),
 	},
+
+	["melon - Kinda-Forest Green"] = {
+		-- Surfaces
+		Surface0 = Color3.fromRGB(45, 90, 61),
+		Surface1 = Color3.fromRGB(30, 61, 43),
+		Surface2 = Color3.fromRGB(18, 38, 26),
+
+		-- Text
+		Subtext0 = Color3.fromRGB(127, 184, 150),
+		Text     = Color3.fromRGB(200, 240, 216),
+
+		-- Scroll
+		Overlay0 = Color3.fromRGB(22, 46, 31),
+
+		-- Accent
+		Blue = Color3.fromRGB(74, 186, 120)
+	},
+
+	["melon - Midnight Violet"] = {
+		-- Surfaces
+		Surface0 = Color3.fromRGB(52, 40, 80),
+		Surface1 = Color3.fromRGB(36, 27, 58),
+		Surface2 = Color3.fromRGB(22, 16, 38),
+	
+		-- Text
+		Subtext0 = Color3.fromRGB(148, 120, 200),
+		Text     = Color3.fromRGB(225, 210, 255),
+	
+		-- Scroll
+		Overlay0 = Color3.fromRGB(14, 10, 26),
+	
+		-- Accent
+		Blue = Color3.fromRGB(180, 120, 255)
+	}
 }
 
 --// The current selected command (via up/down arrow)
@@ -618,6 +652,11 @@ function guiModule:pushCommands(commands)
 	-- get the selected command
 	guiModule.selectedCommand = 1
 
+	-- Reset text
+	if guiModule.guiElements.Gui.Input:FindFirstChild("TextBox") then
+		guiModule.guiElements.Gui.Input:FindFirstChild("TextBox").Text = ""
+	end
+
 	-- finally, we rebuild
 	guiModule:rebuildUI()
 end
@@ -632,6 +671,11 @@ function guiModule:popCommands()
 		guiModule.registeredCommands = prev
 		guiModule.selectedCommand = 1
 		guiModule:addCommands(prev)
+
+		-- Reset Text
+		if guiModule.guiElements.Gui.Input:FindFirstChild("TextBox") then
+			guiModule.guiElements.Gui.Input:FindFirstChild("TextBox").Text = ""
+		end
 	else
 		guiModule:closePalette()
 	end
