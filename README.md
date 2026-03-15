@@ -15,7 +15,7 @@ Commandle brings the VSCode command-palette experience to Roblox Studio!
 Choose whichever method suits you:
 
 - **Roblox Studio** - Install via the toolbox link (TODO)
-- **GitHub Releases** - Download the latest `.rbxm` from the [Releases](../../releases) page
+- **GitHub Releases** - Download the latest `.rbxmx` from the [Releases](../../releases) page
 - **Rojo** - Clone the repo & sync it in with Rojo
 
 ## Creating Custom Commands
@@ -123,3 +123,6 @@ api.requestTheme:Fire("melon - Midnight Violet", {
     Blue     = Color3.fromRGB(180, 120, 255),
 })
 ```
+
+## Attribution
+Catppuccin themes - https://catppuccin.com/
