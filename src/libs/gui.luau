@@ -6,6 +6,13 @@ local TweenService = game:GetService("TweenService")
 
 local freezeFrame = nil
 
+local PaletteSizing = {
+	MAX_HEIGHT = 490,
+	CMD_HEIGHT = 26,
+	CHROME_HEIGHT = 39,
+	MIN_HEIGHT = 38
+}
+
 --// The color palette we use! (Catppuccin Mocha is default)
 guiModule.selectedPalette = "Catppuccin - Mocha"
 
@@ -264,6 +271,35 @@ guiModule.guiElements = {
 --[[
 GUI Creation related stuff
 ]]
+
+--// resizes palette depending on amount of active commands
+function resizePalette(commandCount: number)
+	-- No palette, then exit.
+	local palette = guiModule.guiElements.Gui.Palette
+	if not palette then
+		return
+	end
+
+	-- Calculate our height
+	local targetHeight = (
+		if commandCount == 0 then
+			PaletteSizing.MIN_HEIGHT
+		else
+			math.min(PaletteSizing.CHROME_HEIGHT + commandCount * PaletteSizing.CMD_HEIGHT, PaletteSizing.MAX_HEIGHT)
+	)
+
+	-- Create a new tween, Quint Out
+	local tween = TweenService:Create(
+		palette, 
+		TweenInfo.new(0.12, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
+		{
+			Size = UDim2.new(0, 660, 0, targetHeight)
+		}
+	)
+
+	-- Play our newly created tween!
+	tween:Play()
+end
 
 --// create instance based on className and propertyTable
 function createInstance(className: string, propertyTable: { [string]: any })
@@ -571,6 +607,7 @@ function guiModule:rebuildUI()
 	end
 
 	scrollToSelected()
+	resizePalette(#guiModule.guiElements.Gui.Commands)
 end
 
 --// Move selection up (-1) or down (+1)
