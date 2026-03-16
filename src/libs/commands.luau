@@ -36,6 +36,51 @@ commands.defaultCommands = {
                 end)
             end
         },
+        -- Rename selected
+        {
+            title = "Instance: Rename Selected",
+
+            callback = function()
+
+                guiModule:requestUserInput("new instance name...", function(name)
+
+                    -- Dont want to nil out name!
+                    if name == "" then
+                        return
+                    end
+
+                    -- Get selection, loop through & rename
+
+                    local sel = selectionService:Get()
+
+                    for _, v in sel do
+                        v.Name = name
+                    end
+
+                    guiModule:closePalette()
+
+                end)
+
+            end
+        },
+        -- Set attribute
+        {
+            title = "Instance: Set Attribute",
+
+            callback = function()
+                guiModule:requestUserInput("attribute key...", function(key)
+                    guiModule:requestUserInput("attribute value...", function(value)
+                        local sel = selectionService:Get()
+
+                        for _, v in sel do
+                            v:SetAttribute(key, value)
+                        end
+
+                        guiModule:closePalette()
+                    end)
+                end)
+            end
+        },
         -- Toggle Archivable
         {
             title = "Instance: Toggle Archivable",

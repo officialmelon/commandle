@@ -17,8 +17,12 @@ local PaletteSizing = {
 guiModule.selectedPalette = "Catppuccin - Mocha"
 
 --// Is input mode active? (user supplied input string)
+--// Gosh thats alot of variables :sob:
+--// This whole input system is kinda f'd ngl loool
 guiModule.inputMode = false
 guiModule._inputModePrevPlaceholder = nil
+guiModule._inputModeToken = 0
+guiModule._inputSubmitGuardUntil = 0
 
 guiModule.colorPalette = {
 	["Catppuccin - Latte"] = {
@@ -636,7 +640,11 @@ end
 function guiModule:activateSelected()
 	-- Check for input mode (fixes bug where commands activate in background)
 	if guiModule.inputMode then
-		print("Pass")
+		return
+	end
+
+	-- Ignore leaked input s ubmission
+	if os.clock() < guiModule._inputSubmitGuardUntil then
 		return
 	end
 
@@ -728,10 +736,17 @@ end
 function guiModule:popCommands()
 	-- if in input, cancel & bail!
 	if guiModule.inputMode then
-        local textBox = guiModule.guiElements.Gui.Input:FindFirstChild("TextBox")
-        local oldPlaceholder = textBox and textBox.PlaceholderText
-        guiModule:cancelInputMode(oldPlaceholder or "Search...", nil, nil)
-        return
+		guiModule._inputModeToken += 1
+
+		local textBox = guiModule.guiElements.Gui.Input:FindFirstChild("TextBox")
+		if textBox then
+			textBox.PlaceholderText = guiModule._inputModePrevPlaceholder or "Search..."
+			textBox.Text = ""
+		end
+
+		guiModule.inputMode = false
+		guiModule:rebuildUI()
+		return
 	end
 
 	-- previous
@@ -767,27 +782,36 @@ just be warned!
 ]]
 
 --// Cancel input mode system
-function guiModule:cancelInputMode(returnedValue : string, callback:(string) -> (any))
+function guiModule:cancelInputMode(returnedValue : string, callback:(string) -> (any), token : number)
 	local textBox : TextBox = guiModule.guiElements.Gui.Input:WaitForChild("TextBox")
+	local thisToken = token or guiModule._inputModeToken
 
-	textBox.PlaceholderText = guiModule._inputModePrevPlaceholder
-	textBox.Text = ""
+	-- Guard against return leaking
+	guiModule._inputSubmitGuardUntil = os.clock() + 0.08
 
-	-- TODO: Kinda really super hacky way to get around activateCommand grabbing inputMode AFTER we set it...
-	task.delay(0.01, function()
+	task.defer(function()
+		-- If a new input request has started, do nothing!
+		if guiModule._inputModeToken ~= thisToken then
+			return
+		end
+
 		guiModule.inputMode = false
+		textBox.PlaceholderText = guiModule._inputModePrevPlaceholder or "Search..."
+		textBox.Text = ""
 		guiModule:rebuildUI()
 	end)
 
-	-- Is returnedValue and callback? run callback
-	if returnedValue and callback then
+	if returnedValue ~= nil and callback then
 		callback(returnedValue)
 	end
 end
 
---// Request user input using the search box.
 function guiModule:requestUserInput(textPrompt : string, callback: (string) -> (any))
     local textBox : TextBox = guiModule.guiElements.Gui.Input:WaitForChild("TextBox")
+
+	-- Generation/token for req
+	guiModule._inputModeToken += 1
+	local myToken = guiModule._inputModeToken
 
 	-- Get old before replacement
 	local oldPlaceholderText = textBox.PlaceholderText
@@ -798,21 +822,79 @@ function guiModule:requestUserInput(textPrompt : string, callback: (string) -> (
 	-- Setup input
 	guiModule.inputMode = true
 	guiModule.selectedCommand = nil
-	guiModule._inputModePrevPlaceholder = oldPlaceholderText
 
+	if not guiModule._inputModePrevPlaceholder then
+		guiModule._inputModePrevPlaceholder = oldPlaceholderText
+	end
+
+	-- TextBox!
 	textBox.PlaceholderText = textPrompt
 	textBox.Text = ""
 
-	textBox:CaptureFocus()
+	-- More setup
 	removeAllCommands()
+	resizePalette(0)
+
+	-- Defer focus so the previous Enter press doesn't bleed into this box
+	task.defer(function()
+		-- Is this still the active request?
+		if guiModule._inputModeToken ~= myToken then
+			return
+		end
+
+		textBox:CaptureFocus()
+
+		-- Hard reset again after focus in case Roblox injects junk
+		task.defer(function()
+			if guiModule._inputModeToken ~= myToken then
+				return
+			end
+
+			textBox.Text = ""
+		end)
+	end)
 
 	local conn
 	conn = textBox.FocusLost:Connect(function(enterPressed)
-		if enterPressed then
-			conn:Disconnect()
-			returnedValue = textBox.Text
-			guiModule:cancelInputMode(returnedValue, callback)
+		-- is return call?
+		if not enterPressed then
+			return
 		end
+
+		if conn then
+			conn:Disconnect()
+			conn = nil
+		end
+
+		returnedValue = textBox.Text
+
+		-- Guard against Enter leaking into normal palette activation
+		guiModule._inputSubmitGuardUntil = os.clock() + 0.08
+
+		-- Run callback on next task so nested requestUserInput takes ownership cleanly
+		task.defer(function()
+			-- If a new input request has started, do nothing!
+			if guiModule._inputModeToken ~= myToken then
+				return
+			end
+
+			if callback then
+				callback(returnedValue)
+			end
+
+			task.defer(function()
+				-- If a new input request has started, do nothing!
+				if guiModule._inputModeToken ~= myToken then
+					return
+				end
+
+				guiModule.inputMode = false
+				textBox.PlaceholderText = guiModule._inputModePrevPlaceholder or "Search..."
+				textBox.Text = ""
+				guiModule._inputModePrevPlaceholder = nil
+				guiModule:rebuildUI()
+			end)
+		end)
 	end)
 end
 
@@ -882,6 +964,8 @@ function guiModule:resetState()
 	-- Reset input
 	guiModule.inputMode = false
 	guiModule._inputModePrevPlaceholder = nil
+	guiModule._inputModeToken = 0
+	guiModule._inputSubmitGuardUntil = 0
 
 	-- Unset GUI elements
 	guiModule.guiElements.Gui.Commands = {}
