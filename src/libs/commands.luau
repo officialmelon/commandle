@@ -1,4 +1,4 @@
-kllocal commands = {}
+local commands = {}
 
 local guiModule = require(script.Parent.gui)
 
@@ -731,6 +731,17 @@ commands.defaultCommands = {
                 end
 
                 guiModule:pushCommands(buildPreferences())
+            end
+        },
+        -- Test input
+        {
+            title = "Test: SearchBox -> InputBox",
+            isTest = true,
+
+            callback = function()
+                guiModule:requestUserInput("your key...", function(userInput : string)
+                    print("Input supplied!", userInput)
+                end)
             end
         }
 }

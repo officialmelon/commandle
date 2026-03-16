@@ -9,6 +9,10 @@ local freezeFrame = nil
 --// The color palette we use! (Catppuccin Mocha is default)
 guiModule.selectedPalette = "Catppuccin - Mocha"
 
+--// Is input mode active? (user supplied input string)
+guiModule.inputMode = false
+guiModule._inputModePrevPlaceholder = nil
+
 guiModule.colorPalette = {
 	["Catppuccin - Latte"] = {
 		-- Bases
@@ -533,6 +537,11 @@ end
 
 --// Rebuilds the UI (refreshes commands)
 function guiModule:rebuildUI()
+	-- Check for input mode
+	if guiModule.inputMode then
+		return
+	end
+
 	-- Get the textbox from gui.luau!
 	local textBox = guiModule.guiElements.Gui.Input and guiModule.guiElements.Gui.Input:FindFirstChild("TextBox")
 
@@ -566,6 +575,11 @@ end
 
 --// Move selection up (-1) or down (+1)
 function guiModule:moveSelection(delta: number)
+	-- Check for input mode
+	if guiModule.inputMode then
+		return
+	end
+
 	local count = #guiModule.guiElements.Gui.Commands
 
 	-- Is 0? Return.
@@ -583,6 +597,12 @@ end
 
 --// Activate our selected command
 function guiModule:activateSelected()
+	-- Check for input mode (fixes bug where commands activate in background)
+	if guiModule.inputMode then
+		print("Pass")
+		return
+	end
+
 	local idx = guiModule.selectedCommand
 
 	-- No index? return
@@ -629,6 +649,12 @@ function guiModule:addCommands(commands: { { title: string, callback: () -> () }
 
 	-- Insert commands into registered
 	for _, cmd in commands do
+		
+		-- Is test & developer mode enabled?
+		if cmd.isTest and not _G.developerMode then
+			continue
+		end
+
 		table.insert(guiModule.registeredCommands, cmd)
 	end
 
@@ -663,6 +689,14 @@ end
 
 --// Pops navigation stack commands
 function guiModule:popCommands()
+	-- if in input, cancel & bail!
+	if guiModule.inputMode then
+        local textBox = guiModule.guiElements.Gui.Input:FindFirstChild("TextBox")
+        local oldPlaceholder = textBox and textBox.PlaceholderText
+        guiModule:cancelInputMode(oldPlaceholder or "Search...", nil, nil)
+        return
+	end
+
 	-- previous
 	local prev = table.remove(guiModule.navigationStack)
 
@@ -687,42 +721,62 @@ function guiModule:popCommands()
 	end
 end
 
+--[[
+quick thing about the whole "inputMode" system!:
+we temporarily disable the whole command system
+so that our input system works!
+if any future problems happen because of this...
+just be warned!
+]]
+
+--// Cancel input mode system
+function guiModule:cancelInputMode(returnedValue : string, callback:(string) -> (any))
+	local textBox : TextBox = guiModule.guiElements.Gui.Input:WaitForChild("TextBox")
+
+	textBox.PlaceholderText = guiModule._inputModePrevPlaceholder
+	textBox.Text = ""
+
+	-- TODO: Kinda really super hacky way to get around activateCommand grabbing inputMode AFTER we set it...
+	task.delay(0.01, function()
+		guiModule.inputMode = false
+		guiModule:rebuildUI()
+	end)
+
+	-- Is returnedValue and callback? run callback
+	if returnedValue and callback then
+		callback(returnedValue)
+	end
+end
+
 --// Request user input using the search box.
-function guiModule:requestUserInput(textPrompt : string, callback: () -> ())
+function guiModule:requestUserInput(textPrompt : string, callback: (string) -> (any))
     local textBox : TextBox = guiModule.guiElements.Gui.Input:WaitForChild("TextBox")
 
-	-- Push current stack onto navigationStack
-	table.insert(guiModule.navigationStack, {
-		commands = guiModule.registeredCommands,
-		placeholder = textBox.PlaceholderText
-	})
+	-- Get old before replacement
+	local oldPlaceholderText = textBox.PlaceholderText
 
-	-- Swap into input mode
-	guiModule.registeredCommands = {}
+	-- Value the user inputs (input string)
+	local returnedValue = ""
+
+	-- Setup input
+	guiModule.inputMode = true
+	guiModule.selectedCommand = nil
+	guiModule._inputModePrevPlaceholder = oldPlaceholderText
+
 	textBox.PlaceholderText = textPrompt
 	textBox.Text = ""
-	guiModule.selectedCommand = 1
+
+	textBox:CaptureFocus()
 	removeAllCommands()
 
 	local conn
-    local function rebuild()
-        local val = textBox.Text
-		removeAllCommands()
-		guiModule.selectedCommand = 1
-
-		createCommandPreview(
-			guiModule.guiElements.Gui.CommandsScrolling,
-			"Confirm",
-			function()
-				conn:Disconnect()
-				callback(val)
-			end,
-			true
-		)
-    end
-
-	conn = textBox:GetPropertyChangedSignal("Text")
-	rebuild()
+	conn = textBox.FocusLost:Connect(function(enterPressed)
+		if enterPressed then
+			conn:Disconnect()
+			returnedValue = textBox.Text
+			guiModule:cancelInputMode(returnedValue, callback)
+		end
+	end)
 end
 
 --// This rebuilds the theme (sets all gui elements to said theme)
@@ -778,6 +832,25 @@ function guiModule:rebuildTheme()
 			title.TextColor3 = guiModule.colorPalette[guiModule.selectedPalette].Text
 		end
 	end
+end
+
+--// Reset state
+function guiModule:resetState()
+
+	-- Reset commands & stack related vars
+	guiModule.navigationStack = {}
+	guiModule.registeredCommands = {}
+	guiModule.selectedCommand = nil
+
+	-- Reset input
+	guiModule.inputMode = false
+	guiModule._inputModePrevPlaceholder = nil
+
+	-- Unset GUI elements
+	guiModule.guiElements.Gui.Commands = {}
+	guiModule.guiElements.Gui.Palette = nil
+	guiModule.guiElements.Gui.Input = nil
+	guiModule.guiElements.Gui.CommandsScrolling = nil
 end
 
 --// Animate opening the palette smoothly!
@@ -877,6 +950,9 @@ function guiModule:closePalette(shouldNotAnimate: boolean?)
         freezeFrame:Disconnect()
         freezeFrame = nil
     end
+
+	-- Clean up state
+	guiModule:resetState()
 
     if not shouldNotAnimate then
         -- Animated close (user pressed Esc / toggle)

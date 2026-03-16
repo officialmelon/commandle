@@ -11,6 +11,9 @@ _G.preferences = {
     closeOnFocusLost = true
 }
 
+--// Enable some test commands
+_G.developerMode = false
+
 --[[
 These are some utility functions used for easier code!
 ]]
