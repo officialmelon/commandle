@@ -1,4 +1,4 @@
-local commands = {}
+kllocal commands = {}
 
 local guiModule = require(script.Parent.gui)
 

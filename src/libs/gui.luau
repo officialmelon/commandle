@@ -668,6 +668,12 @@ function guiModule:popCommands()
 
 	-- does previous exist?
 	if prev then
+		-- restore placeholder
+		local textBox = guiModule.guiElements.Gui.Input:FindFirstChild("TextBox")
+		if textBox and prev.placeholder then
+			textBox.PlaceholderText = prev.placeholder
+		end
+
 		guiModule.registeredCommands = prev
 		guiModule.selectedCommand = 1
 		guiModule:addCommands(prev)
@@ -681,6 +687,45 @@ function guiModule:popCommands()
 	end
 end
 
+--// Request user input using the search box.
+function guiModule:requestUserInput(textPrompt : string, callback: () -> ())
+    local textBox : TextBox = guiModule.guiElements.Gui.Input:WaitForChild("TextBox")
+
+	-- Push current stack onto navigationStack
+	table.insert(guiModule.navigationStack, {
+		commands = guiModule.registeredCommands,
+		placeholder = textBox.PlaceholderText
+	})
+
+	-- Swap into input mode
+	guiModule.registeredCommands = {}
+	textBox.PlaceholderText = textPrompt
+	textBox.Text = ""
+	guiModule.selectedCommand = 1
+	removeAllCommands()
+
+	local conn
+    local function rebuild()
+        local val = textBox.Text
+		removeAllCommands()
+		guiModule.selectedCommand = 1
+
+		createCommandPreview(
+			guiModule.guiElements.Gui.CommandsScrolling,
+			"Confirm",
+			function()
+				conn:Disconnect()
+				callback(val)
+			end,
+			true
+		)
+    end
+
+	conn = textBox:GetPropertyChangedSignal("Text")
+	rebuild()
+end
+
+--// This rebuilds the theme (sets all gui elements to said theme)
 function guiModule:rebuildTheme()
 	local gui = guiModule.guiElements.Gui
 
