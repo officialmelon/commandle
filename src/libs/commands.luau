@@ -1,4 +1,4 @@
-kllocal commands = {}
+local commands = {}
 
 local guiModule = require(script.Parent.gui)
 
@@ -34,6 +34,51 @@ commands.defaultCommands = {
                     end
 
                     guiModule:closePalette()
+                end)
+            end
+        },
+        -- Rename selected
+        {
+            title = "Instance: Rename Selected",
+
+            callback = function()
+
+                guiModule:requestUserInput("new instance name...", function(name)
+
+                    -- Dont want to nil out name!
+                    if name == "" then
+                        return
+                    end
+
+                    -- Get selection, loop through & rename
+
+                    local sel = selectionService:Get()
+
+                    for _, v in sel do
+                        v.Name = name
+                    end
+
+                    guiModule:closePalette()
+
+                end)
+
+            end
+        },
+        -- Set attribute
+        {
+            title = "Instance: Set Attribute",
+
+            callback = function()
+                guiModule:requestUserInput("attribute key...", function(key)
+                    guiModule:requestUserInput("attribute value...", function(value)
+                        local sel = selectionService:Get()
+
+                        for _, v in sel do
+                            v:SetAttribute(key, value)
+                        end
+
+                        guiModule:closePalette()
+                    end)
                 end)
             end
         },
@@ -739,6 +784,17 @@ commands.defaultCommands = {
                 end
 
                 guiModule:pushCommands(buildPreferences())
+            end
+        },
+        -- Test input
+        {
+            title = "Test: SearchBox -> InputBox",
+            isTest = true,
+
+            callback = function()
+                guiModule:requestUserInput("your key...", function(userInput : string)
+                    print("Input supplied!", userInput)
+                end)
             end
         }
 }

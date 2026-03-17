@@ -31,7 +31,8 @@ All bindable events live inside the `commandle_api` folder under `StudioService`
 
 ---
 
-## API Reference
+## API Reference 
+> The API Reference may change at any time! 
 
 ### `createCommands` - Register commands
 
@@ -93,6 +94,8 @@ api.closePalette:Fire(false)  -- instant
 ```
 
 ---
+
+> This is subject to change, this is a "barbones" implementation with the wrong naming scheme.
 
 ### `requestTheme` - Register a custom theme
 

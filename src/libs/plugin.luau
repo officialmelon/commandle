@@ -6,6 +6,9 @@ local commandsModule = require(script.Parent.commands)
 local crossCommsModule = require(script.Parent.cross_communication)
 local configModule = require(script.Parent.config)
 
+--// Enable some test commands
+_G.developerMode = false
+
 --[[
 These are some utility functions used for easier code!
 ]]
@@ -47,7 +50,6 @@ end
 function PluginModule:createPlugin(plugin : Plugin)
     -- Lets create the stuff!
 	local Toolbar = createToolbar(plugin, "Commandle")
-	local ToggleButton = createButton(Toolbar, "Commandle Toggle", "Disable/Enable commandle palette", "")
 
     -- Start the plugin
     PluginModule:startPlugin(plugin)

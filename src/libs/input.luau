@@ -4,7 +4,6 @@ local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 
 local commandsModule = require(script.Parent.commands)
-local gui = require(script.Parent.gui)
 local guiModule = require(script.Parent.gui)
 locla configModule = require(script.Parent.config)
 
@@ -92,7 +91,7 @@ function InputModule:startModule(plugin : Plugin)
     -- Binds down shortcut!
     openAction.Triggered:Connect(function()
        -- Open palette, setup commands
-       gui:openPalette()
+       guiModule:openPalette()
        commandsModule:setupCommands()
     end)
 
@@ -107,7 +106,7 @@ function InputModule:startModule(plugin : Plugin)
 
         -- Escape pressed? If so then close. (fallback)
         if isKeyDown("Escape") then
-            gui:popCommands()
+            guiModule:popCommands()
         end
         
         -- If user clicks off, should we close?
@@ -116,7 +115,7 @@ function InputModule:startModule(plugin : Plugin)
             if input.UserInputType == Enum.UserInputType.MouseButton1 then
 
                 -- Get the palette frame & check if not nil
-                local palette = gui.guiElements.Gui.Palette
+                local palette = guiModule.guiElements.Gui.Palette
                 if not palette then 
                     return
                 end
@@ -146,7 +145,11 @@ function InputModule:startModule(plugin : Plugin)
             -- Move downwards
             guiModule:moveSelection(1)
             startHold(1)
-        elseif input.KeyCode == Enum.KeyCode.Return then
+        elseif input.KeyCode == Enum.KeyCode.Return then            
+            if guiModule.inputMode then
+                return
+            end
+
             -- Enter/activate callback()
             guiModule:activateSelected()
         end
@@ -154,7 +157,7 @@ function InputModule:startModule(plugin : Plugin)
         -- Are the binds down? (fallback)
         if keybindsDown(SetBinds) then 
             -- Open palette & register commands
-            gui:openPalette()
+            guiModule:openPalette()
             commandsModule:setupCommands()
         end
     end)
