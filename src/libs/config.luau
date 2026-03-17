@@ -1,7 +1,7 @@
 local configModule = {}
 
 --// The plugin instance is set by pluginModule (plugin.luau) on load
-configModule.pluginReference : plugin = nil
+configModule.pluginReference = nil
 configModule.pluginConfiguration = {
     closeOnFocusLost = true
 }

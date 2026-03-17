@@ -5,7 +5,7 @@ local UserInputService = game:GetService("UserInputService")
 
 local commandsModule = require(script.Parent.commands)
 local guiModule = require(script.Parent.gui)
-locla configModule = require(script.Parent.config)
+local configModule = require(script.Parent.config)
 
 --// Binds that need to be pressed to open up!
 local SetBinds = {

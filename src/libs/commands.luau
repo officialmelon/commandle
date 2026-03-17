@@ -770,14 +770,8 @@ commands.defaultCommands = {
                             title = "Close palette on focus loss (" .. tostring(configModule.pluginConfiguration.closeOnFocusLost) .. ")",
                             callback = function()
                                 configModule.pluginConfiguration.closeOnFocusLost = not configModule.pluginConfiguration.closeOnFocusLost
+                                guiModule:popCommands()
                                 guiModule:pushCommands(buildPreferences())
-                            end
-                        },
-                        -- Change preference for the 
-                        {
-                            title = "",
-                            callback = function()
-                                configModule.pluginConfiguration.
                             end
                         }
                     }
