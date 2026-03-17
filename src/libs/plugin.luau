@@ -4,12 +4,7 @@ local PluginModule = {}
 local inputModule = require(script.Parent.input)
 local commandsModule = require(script.Parent.commands)
 local crossCommsModule = require(script.Parent.cross_communication)
-
---// Global plugin preferences table, saves on close.
---// TODO: Save on close.
-_G.preferences = {
-    closeOnFocusLost = true
-}
+local configModule = require(script.Parent.config)
 
 --[[
 These are some utility functions used for easier code!
@@ -31,6 +26,12 @@ Handles the plugin creation & start.
 
 --// This starts the plugin itself, registers functions etc
 function PluginModule:startPlugin(plugin : Plugin)
+
+    -- Set plugin reference for configModule
+    configModule.pluginReference = plugin
+
+    -- Start the config module
+    configModule:setupConfig()
 
 	-- Start the input module
     inputModule:startModule(plugin)

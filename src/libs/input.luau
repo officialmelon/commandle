@@ -6,6 +6,7 @@ local UserInputService = game:GetService("UserInputService")
 local commandsModule = require(script.Parent.commands)
 local gui = require(script.Parent.gui)
 local guiModule = require(script.Parent.gui)
+locla configModule = require(script.Parent.config)
 
 --// Binds that need to be pressed to open up!
 local SetBinds = {
@@ -110,7 +111,7 @@ function InputModule:startModule(plugin : Plugin)
         end
         
         -- If user clicks off, should we close?
-        if _G.preferences.closeOnFocusLost then
+        if configModule.pluginConfiguration.closeOnFocusLost then
             -- Did we click off the frame? If so then close
             if input.UserInputType == Enum.UserInputType.MouseButton1 then
 

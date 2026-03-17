@@ -9,6 +9,7 @@ local reflectionService = game:GetService("ReflectionService")
 local runService = game:GetService("RunService")
 local stats = game:GetService("Stats")
 local Lighting = game:GetService("Lighting")
+local configModule = require(script.Parent.config)
 
 local currentCamHook = nil
 
@@ -721,10 +722,17 @@ commands.defaultCommands = {
                     return {
                         -- Change preference for closeOnFocusLost
                         {
-                            title = "Close palette on focus loss (" .. tostring(_G.preferences.closeOnFocusLost) .. ")",
+                            title = "Close palette on focus loss (" .. tostring(configModule.pluginConfiguration.closeOnFocusLost) .. ")",
                             callback = function()
-                                _G.preferences.closeOnFocusLost = not _G.preferences.closeOnFocusLost
+                                configModule.pluginConfiguration.closeOnFocusLost = not configModule.pluginConfiguration.closeOnFocusLost
                                 guiModule:pushCommands(buildPreferences())
+                            end
+                        },
+                        -- Change preference for the 
+                        {
+                            title = "",
+                            callback = function()
+                                configModule.pluginConfiguration.
                             end
                         }
                     }
