@@ -709,6 +709,15 @@ end
 
 --// Pushes commands on navigation stack
 function guiModule:pushCommands(commands)
+	-- Guard against the key that triggered this push leaking into the textbox
+	guiModule._inputSubmitGuardUntil = os.clock() + 0.08
+
+	local textBox = guiModule.guiElements.Gui.Input and guiModule.guiElements.Gui.Input:FindFirstChild("TextBox")
+
+	if textBox then
+		textBox:ReleaseFocus()
+	end
+
 	-- Insert registered commands into the stack
 	table.insert(guiModule.navigationStack, guiModule.registeredCommands)
 
@@ -723,9 +732,25 @@ function guiModule:pushCommands(commands)
 	-- get the selected command
 	guiModule.selectedCommand = 1
 
-	-- Reset text
-	if guiModule.guiElements.Gui.Input:FindFirstChild("TextBox") then
-		guiModule.guiElements.Gui.Input:FindFirstChild("TextBox").Text = ""
+	-- Reset text safely
+	if textBox then
+		textBox.Text = ""
+
+		task.defer(function()
+			if not textBox.Parent then
+				return
+			end
+
+			textBox:CaptureFocus()
+
+			task.defer(function()
+				if not textBox.Parent then
+					return
+				end
+
+				textBox.Text = ""
+			end)
+		end)
 	end
 
 	-- finally, we rebuild

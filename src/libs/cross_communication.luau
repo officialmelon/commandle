@@ -18,6 +18,7 @@ local api_objects = {
     openPalette = nil,
     
     requestTheme = nil,
+    requestInput = nil
 }
 
 --[[
@@ -195,9 +196,16 @@ function setupCommunicationEvents()
         guiModule:openPalette()
     end)
 
+    -- requests a theme added!
     api_objects.requestTheme.Event:Connect(function(themeName, array)
         assert(typeof(themeName) == "string" and typeof(array) == "table", "Commandle API: Invalid themeName or table!")
         guiModule.colorPalette[themeName] = array
+    end)
+
+    -- request input 
+    api_objects.requestInput.Event:Connect(function(userPrompt : string, callback : () -> ())
+        assert(callback, "Commandle API: No userPrompt supplied!")
+        guiModule:requestUserInput(userPrompt or "", callback)
     end)
 end
 
@@ -243,6 +251,11 @@ function setupCommunication()
     requestTheme.Parent = crossParent
     requestTheme.Name = "requestTheme"
 
+    -- Request input field
+    local requestInput = Instance.new("BindableEvent")
+    requestInput.Parent = crossParent
+    requestInput.Name = "requestInput"
+
     -- Assign API functions to module table!
     api_objects.createCommands = createCommands
     api_objects.pushRequest = pushRequest
@@ -250,6 +263,7 @@ function setupCommunication()
     api_objects.closePalette = closePalette
     api_objects.openPalette = openPalette
     api_objects.requestTheme = requestTheme
+    api_objects.requestInput = requestInput
 end
 
 --// Runs the setup functions.
