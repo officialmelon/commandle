@@ -13,6 +13,10 @@ local SetBinds = {
     "F"
 }
 
+--// Enter guard
+local returnHeld = false
+local lastReturnTime = 0
+
 --// Hold connection for arrow keys
 local holdConnection = nil
 
@@ -150,6 +154,18 @@ function InputModule:startModule(plugin : Plugin)
                 return
             end
 
+            if returnHeld then
+                return
+            end
+
+            -- Return held checks
+            returnHeld = true
+            local now = os.clock()
+            if now - lastReturnTime < 0.18 then
+                return
+            end
+            lastReturnTime = now
+
             -- Enter/activate callback()
             guiModule:activateSelected()
         end
@@ -166,6 +182,8 @@ function InputModule:startModule(plugin : Plugin)
     UserInputService.InputEnded:Connect(function(input)
         if input.KeyCode == Enum.KeyCode.Up or input.KeyCode == Enum.KeyCode.Down then 
             cancelHold() 
+        elseif input.KeyCode == Enum.KeyCode.Return then
+            returnHeld = false
         end
     end)
 end

@@ -709,13 +709,14 @@ end
 
 --// Pushes commands on navigation stack
 function guiModule:pushCommands(commands)
-	-- Guard against the key that triggered this push leaking into the textbox
-	guiModule._inputSubmitGuardUntil = os.clock() + 0.08
+	-- Guard against the key that triggered this push leaking into the textbox!
+	guiModule._inputSubmitGuardUntil = os.clock() + 0.14
 
 	local textBox = guiModule.guiElements.Gui.Input and guiModule.guiElements.Gui.Input:FindFirstChild("TextBox")
 
 	if textBox then
 		textBox:ReleaseFocus()
+		textBox.Text = ""
 	end
 
 	-- Insert registered commands into the stack
@@ -732,15 +733,16 @@ function guiModule:pushCommands(commands)
 	-- get the selected command
 	guiModule.selectedCommand = 1
 
-	-- Reset text safely
-	if textBox then
-		textBox.Text = ""
+	guiModule:rebuildUI()
 
-		task.defer(function()
+	-- Refocus only after the originating Enter is definitely gone
+	if textBox then
+		task.delay(0.14, function()
 			if not textBox.Parent then
 				return
 			end
 
+			textBox.Text = ""
 			textBox:CaptureFocus()
 
 			task.defer(function()
@@ -748,13 +750,13 @@ function guiModule:pushCommands(commands)
 					return
 				end
 
-				textBox.Text = ""
+				-- Hard clear in case Roblox injected a stray character
+				if os.clock() < guiModule._inputSubmitGuardUntil + 0.03 then
+					textBox.Text = ""
+				end
 			end)
 		end)
 	end
-
-	-- finally, we rebuild
-	guiModule:rebuildUI()
 end
 
 --// Pops navigation stack commands
