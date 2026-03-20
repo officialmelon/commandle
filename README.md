@@ -18,6 +18,8 @@ Choose whichever method suits you:
 - **GitHub Releases** - Download the latest `.rbxmx` from the [Releases](../../releases) page
 - **Rojo** - Clone the repo & sync it in with Rojo
 
+> The key bind to open is LeftShift + P, however a custom bind can be added through Roblox Studio keyboard shortcuts itself!
+
 ## Creating Custom Commands
 
 Commandle exposes a simple API via `StudioService` so any plugin can register its own commands.
